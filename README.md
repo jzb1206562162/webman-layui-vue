@@ -11,7 +11,7 @@
 <b>注意:本项目主体为plugin/admin 文件夹,本质上是沿用官方后台插件并使用think-template改了前端UI;</b></br>
 
 <b>安装方式:</b></br>
-<b>1:</b>简单方式,直接克隆到本地,php start.php start运行项目,访问/app/admin,并安装数据库即可</br>
+<b>1:</b>简单方式,直接克隆到本地并安装composer install ,然后php start.php start运行项目,访问/app/admin,并安装数据库即可</br>
 
 <b>2.自己手动安装</b></br>
 先composer安装好workerman和官方webman-admin插件,</br>
