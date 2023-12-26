@@ -1,0 +1,29 @@
+@import url(./admin.css);
+@import url(./display.css);
+@import url(./mobile.css);
+@import url(./reset.css);
+
+.global-css {
+    font-family: 'Courier New', Courier, monospace;
+}
+#app {
+    height: 100%;
+}
+body {
+    height: 100%;
+}
+body::-webkit-scrollbar {
+    width: 0.5em;
+    background-color: #F5F5F5;
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: #e2e2e2;
+}
+
+html {
+    height: 100%;
+}
+[v-cloak]{
+    display: none;
+}

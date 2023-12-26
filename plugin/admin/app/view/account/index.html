@@ -1,0 +1,251 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<lay-container :fluid="true" style="padding: 10px">
+    <lay-row :span="24" style="display: flex">
+        <lay-col style="max-width: 400px" :xs="24">
+            <lay-card shadow="hover" class="info-user">
+                <div style="text-align: center">
+                    <lay-avatar :src="src" radius class="user-avatar"></lay-avatar>
+                    <div class="user-name">{{model4.nickname}}</div>
+                    <div class="user-briefing">孤岛高山何其多</div>
+                </div>
+
+                <lay-row>
+                    <lay-icon type="layui-icon-username"></lay-icon>
+                    <lay-tooltip content="创建时间"><span>&nbsp;&nbsp;&nbsp;{{model4.username}}</span></lay-tooltip>
+                </lay-row>
+                <lay-row>
+                    <lay-icon type="layui-icon-eye"></lay-icon>
+                    <lay-tooltip content="创建时间">
+                        <span>  &nbsp;&nbsp;{{model4.created_at}}</span>
+                    </lay-tooltip>
+                </lay-row>
+                <lay-row>
+
+                    <lay-icon type="layui-icon-time"></lay-icon>
+                    <lay-tooltip content="上次登录时间">
+                        <span> &nbsp;&nbsp;&nbsp;{{model4.login_at}}</span>
+                    </lay-tooltip>
+                </lay-row>
+
+                <lay-line border-style="dashed" border-width="1px"></lay-line>
+
+            </lay-card>
+        </lay-col>
+        <lay-col style="flex: 1; background-color: #fff" :xs="24">
+            <lay-tab type="brief" v-model="activeTab" @change="changeTab">
+                <lay-tab-item title="基本信息" id="baseInfo">
+                    <div class="tab-content">
+                        <lay-form :model="model4" ref="layFormRef4" label-width="60" size="sm" :>
+                            <lay-form-item label="昵称" prop="nickname" required>
+                                <lay-input v-model="model4.nickname" allow-clear></lay-input>
+                            </lay-form-item>
+
+                            <lay-form-item label="联系电话" prop="mobile">
+                                <lay-input v-model="model4.mobile" type="phone" allow-clear></lay-input>
+                            </lay-form-item>
+                            <lay-form-item label="邮箱" prop="email">
+                                <lay-input v-model="model4.email" type="email" allow-clear></lay-input>
+                            </lay-form-item>
+                            <lay-form-item style="text-align: center">
+                                <lay-button type="primary" @click="submit4">提交</lay-button>
+                            </lay-form-item>
+                        </lay-form>
+                    </div>
+                </lay-tab-item>
+                <lay-tab-item title="密码修改" id="bindingInfo">
+                    <div class="tab-content">
+                        <lay-form :model="model11" ref="layFormRef11" label-width="80" size="sm" required
+                                  :init-validate="false">
+                            <lay-form-item label="原始密码" prop="old_password">
+                                <lay-input v-model="model11.old_password" placeholder="请输入原始密码"></lay-input>
+                            </lay-form-item>
+                            <lay-form-item label="新密码" prop="password">
+                                <lay-input v-model="model11.password" placeholder="请输入新密码"></lay-input>
+                            </lay-form-item>
+                            <lay-form-item label="重复新密码" prop="password_confirm">
+                                <lay-input v-model="model11.password_confirm"
+                                           placeholder="请重复输入新密码"></lay-input>
+                            </lay-form-item>
+                            <lay-form-item style="text-align: center">
+                                <lay-button type="primary" @click="submit11">提交</lay-button>
+                            </lay-form-item>
+                        </lay-form>
+                    </div>
+                </lay-tab-item>
+            </lay-tab>
+        </lay-col>
+    </lay-row>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+<script>
+    const src =
+        'https://foruda.gitee.com/avatar/1677022544584087390/4835367_jmysy_1578975358.png'
+
+
+    const activeTab = ref('baseInfo')
+
+    const model4 = ref({
+        email: '',
+        avatar: "/app/admin/avatar.png",
+        mobile: null,
+        nickname: "超级管理员",
+        login_at: "2",
+        created_at: "2",
+
+    })
+    const model11 = ref({
+        old_password: '',
+        password: '',
+        password_confirm: '',
+    })
+
+    const layFormRef4 = ref()
+    const layFormRef11 = ref()
+
+    function changeTab(event) {
+        if (event === 'bindingInfo') layFormRef11.value.reset()
+    }
+
+    const submit4 = function () {
+        layFormRef4.value.validate(async (isValidate, model, errors) => {
+            if (isValidate) {
+                let data = deepClone(model)
+                let res = await ajax('/app/admin/account/update', data, false, true)
+                if (res.code === 0) {
+                    setTimeout(function () {
+                        onLoad();
+                    }, 1000);
+
+
+                }
+            }
+        })
+    }
+    const submit11 = function () {
+        layFormRef11.value.validate(async (isValidate, model, errors) => {
+            if (isValidate) {
+                console.log(model.roles)
+                let data = deepClone(model)
+                let res = await ajax('/app/admin/account/password', data)
+
+                if (res.code === 0) {
+                    await onLoad();
+                }
+            }
+        })
+    }
+
+
+    async function onLoad(bool = false) {
+        if (bool) toReset();
+        let res = await get('/app/admin/account/info')
+        if (res) {
+            model4.value = res.data;
+            console.log(model4.value)
+        }
+    }
+
+    vue_data = {};
+    vue_setup = {
+        src, changeTab,
+        model4, model11,
+        activeTab,
+        layFormRef4, layFormRef11,
+        submit4,
+        onLoad, submit11
+    }
+
+    methods = {};
+    watch = {};
+    computed = {};
+    mounted = function () {
+        onLoad();
+    };
+    updated = function () {
+    };
+</script>
+
+
+<style scoped>
+    .layui-tag .layui-tag-text {
+        margin: 0 8px 8px 0;
+    }
+
+    .info-user {
+        max-width: 400px;
+        min-width: 320px;
+        padding: 20px;
+        margin-right: 10px;
+    }
+
+    .user-avatar {
+        width: 40%;
+        height: 40%;
+    }
+
+    .user-name {
+        font-size: 24px;
+        margin: 15px;
+    }
+
+    .user-briefing {
+        color: #0006;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .header-title {
+        font-size: 20px;
+        font-weight: 500;
+        margin-top: 12px;
+        margin-bottom: 20px;
+    }
+
+    .header-describe {
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .tab-content {
+        height: 368px;
+        max-width: 500px;
+        padding: 0 20px;
+        background-color: #fff;
+    }
+
+    .account-item {
+        display: flex;
+        width: 99%;
+        height: 41px;
+        line-height: 43px;
+        margin-right: 10px;
+        padding: 12px 0;
+        border-bottom: #ccc solid 1px;
+    }
+
+    .account-item:last-child {
+        border-bottom: none;
+    }
+
+    .account-desc {
+        flex: 1;
+        color: #0006;
+        line-height: 24px;
+        display: inline-block;
+    }
+
+    .account-option {
+        width: 45px;
+        display: inline-block;
+        color: var(--global-primary-color);
+    }
+</style>
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}

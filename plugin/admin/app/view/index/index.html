@@ -1,0 +1,704 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{$title?:'后台管理'}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}
+
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalContent.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalTab.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalBreadcrumb.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalMenuItem.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalMenu.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalMessageTab.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalMainMenuItem.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalMainMenu.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalColor.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalSetupTheme.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalSetupItem.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/GlobalSetup.js"></script>
+{/block}
+{block name="appDiv"}
+<lay-layout
+        :class="[appStore.tab ? 'has-tab' : '', appStore.collapse ? 'collapse' : '',  appStore.greyMode ? 'grey-mode' : '']">
+    <!-- 遮盖层 -->
+    <div v-if="!appStore.collapse" class="layui-layer-shade hidden-sm-and-up" @click="collapse"></div>
+    <!-- 核心菜单  -->
+    <lay-side :width="sideWidth" :class="appStore.sideTheme == 'dark' ? 'dark changeBgc' : 'light'">
+        <lay-logo v-if="appStore.logo" style="width: auto;line-height: 50px">
+            <!-- 图 标 -->
+            <img class="logo" :src="appStore.logoImage" style="width: 34px;height: 34px" alt="logo">
+            <!-- 标 题 -->
+            <a href="/" v-if="logTitle">&#12288;
+                <span style="color:#2d8cf0;font-weight: 600;font-size: 17px;">{{appStore.logoTitle}}</span>
+            </a>
+        </lay-logo>
+        <div class="side-menu-wrapper">
+            <div class="side-menu1" v-if="appStore.subfield && appStore.subfieldPosition == 'side'">
+                <global-main-menu :collapse="true" :menus="mainMenus" :selected-key="mainSelectedKey"
+                                  @change-selected-key="changeMainSelectedKey"
+                ></global-main-menu>
+            </div>
+            <div class="side-menu2">
+                <global-menu :collapse="appStore.collapse" :menus="menus"
+                             :open-keys="openKeys" :selected-key="selectedKey"
+                             @change-open-keys="changeOpenKeys"
+                             @change-selected-key="changeSelectedKey"></global-menu>
+            </div>
+        </div>
+    </lay-side>
+    <lay-layout style="width: 0px">
+        <!-- 布局头部 -->
+        <lay-header style="display: flex">
+            <lay-menu class="layui-layout-left">
+                <lay-menu-item @click="collapse">
+                    <lay-icon v-if="appStore.collapse" type="layui-icon-spread-left"
+                    ></lay-icon>
+                    <lay-icon v-else type="layui-icon-shrink-right"></lay-icon>
+                </lay-menu-item>
+                <lay-menu-item class="hidden-xs-only" @click="refresh">
+                    <lay-icon type="layui-icon-refresh-one"></lay-icon>
+                </lay-menu-item>
+                <lay-menu-item class="hidden-xs-only" v-if="appStore.breadcrumb" style="padding: 0px 15px">
+                    <global-breadcrumb></global-breadcrumb>
+                </lay-menu-item>
+            </lay-menu>
+            <!-- 菜单分组 -->
+            <lay-menu
+                    v-if="appStore.subfield && appStore.subfieldPosition == 'head'" class="layui-nav-center"
+                    :selectedKey="mainSelectedKey" @change-selected-key="changeMainSelectedKey">
+                <template v-for="(menu, index) in mainMenus" :key="index">
+                    <lay-menu-item :id="menu.id" v-if="index < 4">
+                        <template #title>{{ menu.title }}</template>
+                    </lay-menu-item>
+                </template>
+            </lay-menu>
+            <lay-dropdown
+                    v-if="appStore.subfield && appStore.subfieldPosition == 'head'" trigger="hover"
+                    placement="bottom">
+                <lay-icon
+                        type="layui-icon-more"
+                        style="padding: 0px 15px"
+                ></lay-icon>
+                <template #content>
+                    <lay-dropdown-menu>
+                        <template v-for="(menu, index) in mainMenus">
+                            <lay-dropdown-menu-item :key="menu.id" v-if="index >= 4"
+                                                    @click="changeMainSelectedKey(menu.id)">{{ menu.title }}
+                            </lay-dropdown-menu-item>
+                        </template>
+                    </lay-dropdown-menu>
+                </template>
+            </lay-dropdown>
+            <lay-menu class="layui-layout-right">
+                <lay-menu-item>
+                    <lay-dropdown updateAtScroll placement="bottom">
+                        <lay-icon type="layui-icon-senior"></lay-icon>
+                        <template #content>
+                            <lay-dropdown-menu>
+                                <lay-dropdown-menu-item @click="changeVersion(999)">
+                                    <template #default>重置配置数据</template>
+                                </lay-dropdown-menu-item>
+                                <lay-dropdown-menu-item @click="changeVersion(0)">
+                                    <template #default>查询layui-vue版本</template>
+                                </lay-dropdown-menu-item>
+                                <lay-dropdown-menu-item v-if="showUpdateVersion" @click="changeVersion(1)">
+                                    <template #default>下载最新版</template>
+                                </lay-dropdown-menu-item>
+                            </lay-dropdown-menu>
+                        </template>
+                    </lay-dropdown>
+                </lay-menu-item>
+                <lay-menu-item>
+                    <lay-fullscreen v-slot="{ toggle, isFullscreen }">
+                        <lay-icon @click="toggle()"
+                                  :type=" isFullscreen ? 'layui-icon-screen-restore': 'layui-icon-screen-full' "></lay-icon>
+                    </lay-fullscreen>
+                </lay-menu-item>
+                <lay-menu-item>
+                    <global-message-tab :flag="flag">
+                        <lay-icon type="layui-icon-notice" @click="changeDropdown"></lay-icon>
+                    </global-message-tab>
+                </lay-menu-item>
+                <lay-menu-item>
+                    <lay-dropdown updateAtScroll placement="bottom">
+                        <lay-icon type="layui-icon-website"></lay-icon>
+                        <template #content>
+                            <lay-dropdown-menu>
+                                <lay-dropdown-menu-item @click="() => (appStore.locale = 'zh_CN')">
+                                    <template #default>中文 {{ t('hello') }}</template>
+                                </lay-dropdown-menu-item>
+                                <lay-dropdown-menu-item @click="() => (appStore.locale = 'en_US')">
+                                    <template #default>英文 {{ t('hello') }}</template>
+                                </lay-dropdown-menu-item>
+                            </lay-dropdown-menu>
+                        </template>
+                    </lay-dropdown>
+                </lay-menu-item>
+                <lay-menu-item>
+                    <lay-dropdown updateAtScroll placement="bottom">
+                        <lay-icon type="layui-icon-username"></lay-icon>
+                        <template #content>
+                            <lay-dropdown-menu>
+                                <lay-dropdown-menu-item @click="toUserInfo">
+                                    <template #default>用户信息</template>
+                                </lay-dropdown-menu-item>
+                                <lay-dropdown-menu-item @click="toSystemSet">
+                                    <template #default>系统设置</template>
+                                </lay-dropdown-menu-item>
+                                <lay-line></lay-line>
+                                <lay-dropdown-menu-item @click="logOut">
+                                    <template #default>注销登录</template>
+                                </lay-dropdown-menu-item>
+                            </lay-dropdown-menu>
+                        </template>
+                    </lay-dropdown>
+                </lay-menu-item>
+                <lay-menu-item @click="changeVisible">
+                    <lay-icon type="layui-icon-more-vertical"></lay-icon>
+                </lay-menu-item>
+            </lay-menu>
+        </lay-header>
+        <lay-body>
+            <global-tab
+                    :class=" appStore.tagsTheme == 'concise' ? '' : appStore.tagsTheme == 'underpainting' ? 'underpainting' : 'designer' ">
+            </global-tab>
+
+        </lay-body>
+        <lay-footer></lay-footer>
+    </lay-layout>
+</lay-layout>
+<global-setup v-model="visible"></global-setup>
+{/block}
+
+{block name="afterDiv"}
+<script>
+    const diff = function (arr1, arr2) {
+        arr1 = Array.from(new Set(arr1));
+        arr2 = Array.from(new Set(arr2));
+        var mergeArr = arr1.concat(arr2);
+        return mergeArr.filter((x) => !(arr1.includes(x) && arr2.includes(x)));
+    }
+    const getParents = function (list, id) {
+        for (let i in list) {
+            if (list[i].id === id) {
+                return [list[i]]
+            }
+            if (list[i].children) {
+                let node = getParents(list[i].children, id)
+                if (node !== undefined) {
+                    return node.concat(list[i])
+                }
+            }
+        }
+    }
+    const getNode = function (list, id) {
+        for (let i in list) {
+            let item = list[i];
+            if (item.id === id) {
+                return item;
+            } else {
+                if (item.children) {
+                    let value = getNode(item.children, id);
+                    if (value) {
+                        return value;
+                    }
+                }
+            }
+        }
+    }
+</script>
+{/block}
+{block name="constApp"}
+<script>
+    const App = {
+        data() {
+            return {
+                showUpdateVersion: ref(false),//展示下载最新版按钮
+                flag: ref(false),//展示铃铛消息
+                locales: [
+                    {name: 'zh_CN', locale: zh_CN, merge: true},
+                    {name: 'en_US', locale: en_US, merge: true}
+                ],
+                openKeys: ref(["/workspaces"]),//菜单展开项id,是数组,可同时展开多项
+            }  //属性
+        },
+        setup() {
+            const {t} = useI18n();//语言
+            //ref 字符串数组  reactive 对象
+            const appStore = reactive(useAppStore);//全局配置
+            const userStore = reactive(useUserStore);//用户信息
+            const tabs = ref([]);
+            const mainSelectedKey = ref("");//主菜单选中项id,字符串,只有一个
+            const selectedKey = ref('');//次菜单选中项id,字符串,只要一个
+            const currentPath = ref(''); //tab默认选中id
+            const breadcrumbInfo = ref([])//面包屑内容
+            const visible = ref(false)//配置栏抽屉可见
+
+            //全局属性 适用于属性
+            provide('tabs', tabs);
+            provide('currentPath', currentPath);
+            provide('appStore', appStore);
+            provide('userStore', userStore);
+            provide('selectedKey', selectedKey);
+            provide('mainSelectedKey', mainSelectedKey);
+            provide('breadcrumbInfo', breadcrumbInfo);
+            provide('visible', visible);
+            return {
+                t, appStore, userStore, tabs, mainSelectedKey, selectedKey, currentPath, breadcrumbInfo, visible
+            }
+        },
+        provide() { //全局方法 适用于方法,不要在里面写属性
+            return {
+                to: this.to,
+            }
+        },
+        computed: { //计算属性
+            logTitle() {
+                return !this.appStore.collapse
+            },
+            isSubfield() {
+                return this.appStore.subfield
+            }
+            ,
+            menus() {
+                if (this.isSubfield) {
+                    const node = getNode(this.userStore.menus, this.mainSelectedKey);
+                    if (node) {
+                        return node.children;
+                    } else {
+                        return [];
+                    }
+                } else {
+                    return this.userStore.menus;
+                }
+            }
+            ,
+            permissions() {
+                return this.userStore.permissions
+            }
+            ,
+            sideWidth() {
+                return this.appStore.collapse ? '60px' : this.appStore.subfield && this.appStore.subfieldPosition === 'side' ? '280px' : '220px'
+            }
+            ,
+            mainMenus() {
+                if (this.isSubfield) {
+                    return this.userStore.menus;
+                } else {
+                    return [];
+                }
+            }
+        }
+        ,
+        methods: {
+
+            //切换页面,菜单tab,面包屑content等
+            to(key) {
+                console.log(key)
+                if (typeof key !== 'string') {
+                    layer.msg('路径参数不正确' + key, {
+                        icon: 5,
+                        time: 3000
+                    })
+                    return false
+                }
+                //修改tab
+                //检查tabs里存不存在这个key
+                const index = this.tabs.findIndex(tab => tab.id === key);
+                //修改菜单
+                let parent = this.isSubfield ? getParents(this.mainMenus, key) : getParents(this.menus, key);
+                if (index !== -1) { // 存在
+                    //如果它不在菜单内,说明是固定标签 //修改面包屑
+                    if (!parent) this.appStore.breadcrumbInfo = this.breadcrumbInfo = [this.tabs[index]]
+                } else { // 不存在则创建一个id为key的子项
+                    if (this.tabs.length >= this.appStore.maxtabs) {
+                        layer.msg("最大只能同时存在" + this.appStore.maxtabs + '标签,请关闭其他标签后重试', {
+                            icon: 5,
+                            time: 3000
+                        })
+                        return false;
+                    }
+                    //console.log(this.tabs.length)
+                    //console.log(this.appStore.maxtabs)
+                    let val = getNode(this.menus, key);
+                    if (!val) {
+                        val = {id: key, href: key, title: key,}
+                    }
+                    this.tabs.push(val);
+                }
+                //切换到当前key标签
+                this.currentPath = this.appStore.currentPath = key;
+                if (parent && parent[1]) {
+                    let openkey = deepClone(this.openKeys);
+                    openkey.push(parent[1]['id'])
+
+                    //菜单展开切换
+                    if (this.isSubfield) {
+                        this.changeMainSelectedKey(parent[0]['id'])
+                    } else {
+                        this.changeOpenKeys(openkey);
+                    }
+
+                    // this.openKeys= [parent[1]['id']];
+                    // if (parent[2])this.openKeys.push(parent[2]['id']);
+                    // this.appStore.openKeys= this.openKeys  ;
+                    //主菜单切换
+                    this.appStore.mainSelectedKey = this.mainSelectedKey = parent[1]['id'];
+                    //修改面包屑
+                    this.appStore.breadcrumbInfo = this.breadcrumbInfo = parent.reverse();
+                }
+                //次菜单切换
+                this.selectedKey = this.appStore.selectedKey = key;
+
+
+            },
+            //二级三级菜单选中
+            changeSelectedKey(key) {
+                //console.log('changeSelectedKey')
+                var node = getNode(this.userStore.menus, key);
+                if (node.type && (node.type === "modal" || node.type === 3)) {
+                    layer.open({
+                        type: "iframe",
+                        content: node.href ? node.href : node.id,
+                        area: ["80%", "80%"],
+                        maxmin: true,
+                    });
+                    return;
+                }
+                if (node.type && (node.type === "blank" || node.type === 4)) {
+                    window.open(node.href ? node.href : node.id, "_blank");
+                    return;
+                }
+                this.to(key)
+            },
+            //主一级菜单选中,仅当菜单分离时使用
+            changeMainSelectedKey(key) {
+                //console.log('changeMainSelectedKey')
+                //console.log(key)
+                var node = getNode(this.userStore.menus, key);
+                if (node.type && node.type === "modal") {
+                    layer.open({
+                        type: "iframe",
+                        content: node.id,
+                        area: ["80%", "80%"],
+                        maxmin: true,
+                    });
+                    return;
+                }
+                if (node.type && node.type === "blank") {
+                    window.open(node.id, "_blank");
+                    return;
+                }
+                this.mainSelectedKey = key;
+            },
+            //上下展开菜单
+            changeOpenKeys(keys) {
+                //console.log('changeOpenKeys')
+                //console.log(keys)
+                const addArr = diff(this.openKeys, keys);
+                if (keys.length > this.openKeys.length && this.appStore.accordion) {
+                    var arr = getParents(this.menus, addArr[0]);
+                    if (arr && arr.length > 0) {
+                        this.openKeys = arr.map((item) => {
+                            return item.id;
+                        });
+                    }
+                } else {
+                    this.openKeys = keys;
+                }
+                this.appStore.openKeys = this.openKeys
+            },
+            //展开关闭消息铃铛
+            changeDropdown() {
+                //console.log('changeDropdown')
+                this.flag = !this.flag
+            },
+            //用户下系统设置按钮
+            toSystemSet() {
+                this.to('13')
+            },
+            //用户下用户信息按钮
+            toUserInfo() {
+                this.to('10')
+            },
+            //用户下注销按钮
+            async logOut() {
+                //console.log('logOut')
+                this.userStore = useUserStore
+                this.userStore.token = ''
+                this.userStore.userInfo = {}
+                const res = await get('/app/admin/account/logout')
+                window.location = '/app/admin/index/index'
+            },
+            //页面刷新按钮
+            refresh() {
+                let tabToUpdate = this.tabs.find(tab => tab.id === this.appStore.currentPath);
+                tabToUpdate.show = false;
+                if (tabToUpdate) {
+                    setTimeout(function () {
+                        tabToUpdate.show = true;
+                    }, 100)
+                }
+            },
+            //左右菜单折叠
+            collapse() {
+                this.appStore.collapse = !this.appStore.collapse;
+            },
+            //配置抽屉展开
+            changeVisible() {
+                //console.log('changeVisible')
+                this.visible = !this.visible
+            },
+            async changeVersion(num) {
+                if (num === 999) {
+                    localStorage.clear();//删除全部缓存 ,修改上方基础配置后需要清除缓存
+                    location.reload();
+                    return;
+                }
+
+                //console.log('changeVersion')
+                let res = await get('/app/admin/index/changeVersion?num=' + num)
+                if (res) {
+                    layer.msg(res.msg, {time: 5000})
+                    this.showUpdateVersion = true
+                    if (num === 1) {
+                        location.reload();
+                    }
+                }
+            },
+            //初始化获取用户信
+            async getUserStore() {
+
+                let res = await get('/app/admin/rule/get?fresh=' + Math.random())
+                if (res) this.userStore.menus = res.data
+                //console.log(this.userStore.menus)
+                //console.log(res)
+            },
+            //初始化获取系统设置
+            async getAppStore() {
+                let res = await get('/app/admin/config/get?fresh=' + Math.random())
+                if (res) {
+                    this.appStore.logoTitle = res.logo.title
+                    this.appStore.logoImage = res.logo.image
+                    this.appStore.maxtabs = res.tab.max
+                    this.appStore.tabs[0] = {id: res.tab.index.id, href: res.tab.index.href, title: res.tab.index.title, closable: false}
+                    this.appStore.breadcrumbInfo = [{"id": res.tab.index.id, "icon": "layui-icon-home", "title": res.tab.index.title,}];
+                    this.appStore.mainSelectedKey = (res.tab.index.id)//主菜单选中项id,字符串,只有一个
+                    this.appStore.selectedKey = (res.tab.index.id)//次菜单选中项id,字符串,只要一个
+                    this.appStore.currentPath = (res.tab.index.id)//tab默认选中id
+                }
+            },
+
+            changeAppStore(key, val) {
+                val = deepClone(val)
+                this.appStore[key] = val;
+            },
+            changeUserStore(key, val) {
+                val = deepClone(val)
+                this.userStore[key] = val;
+            }
+        }
+        ,
+        async mounted() {
+            localStorage.removeItem('useUserStore');//删除useUserStore缓存
+            if (document.body.clientWidth < 768) {
+                this.appStore.collapse = true
+                //console.log('mounted-width')
+            }
+            getsTheMemoryFootprint();
+            await this.getUserStore();
+            await this.getAppStore();
+
+
+            this.openKeys = this.appStore.openKeys
+            this.mainSelectedKey = this.appStore.mainSelectedKey
+            this.selectedKey = this.appStore.selectedKey
+            this.tabs = this.appStore.tabs
+            this.currentPath = this.appStore.currentPath
+            this.breadcrumbInfo = this.appStore.breadcrumbInfo
+
+            window.to = this.to;// 这里需要暴露给全局，这样的话，子页面才能调用相对应的方法,调用方式 window.parent.to(path)
+            window.changeUserStore = this.changeUserStore;//
+            window.changeAppStore = this.changeAppStore;//
+
+        },
+        watch: {
+            appStore: {
+                handler(newValue, oldValue) {
+                    localStorage.setItem('useAppStore', JSON.stringify(newValue));
+                    // console.log('appStore被修改')
+                    // //console.log(newValue)
+                    // //console.log(oldValue)
+                    // 注意：在嵌套的变更中，
+                    // 只要没有替换对象本身，
+                    // 那么这里的 `newValue` 和 `oldValue` 相同
+                },
+                deep: true
+            }, userStore: {
+                handler(newValue, oldValue) {
+                    localStorage.setItem('useUserStore', JSON.stringify(newValue));
+                    // console.log('userStore被修改')
+                    // console.log(newValue)
+                    // console.log(oldValue)
+                    // 注意：在嵌套的变更中，
+                    // 只要没有替换对象本身，
+                    // 那么这里的 `newValue` 和 `oldValue` 相同
+                },
+                deep: true
+            },
+        }
+        ,
+    };
+
+
+    const router = VueRouter.createRouter({
+        history: VueRouter.createWebHashHistory(),
+        routes: [
+            {path: '/', component: {}},
+        ]
+    })
+    // setTimeout(() => {
+    const app = Vue.createApp(App);
+    // app.component('global-content', GlobalContent);
+    app.component('global-tab', GlobalTab);
+    app.component('global-breadcrumb', GlobalBreadcrumb);
+    app.component('global-menu-item', GlobalMenuItem);
+    app.component('global-menu', GlobalMenu);
+    app.component('global-message-tab', GlobalMessageTab);
+    app.component('global-main-menu', GlobalMainMenu);
+    app.component('global-setup', GlobalSetup);
+
+    app.use(LayuiVue);
+    app.use(router);//避免LayuiVue的menu组件出现报错信息,所以加了这个路由,实际是没用上;不嫌弃报错就直接删了吧,没啥影响
+    app.config.devtools = true;
+
+    app.mount("#app");
+    // }, 1);
+
+</script>
+<style lang="less">
+    @media screen and (max-width: 767px) {
+        .layui-side {
+            position: absolute;
+            height: 100vh;
+        }
+    }
+
+    /*鼠标经过背景色，增加了improtant，否则设置无效*/
+    .layui-header .layui-nav-item .layui-icon:hover {
+        background: whitesmoke !important;
+    }
+
+    /*面包屑颜色兼容*/
+    .layui-header .layui-nav-item .layui-breadcrumb a {
+        color: #999 !important;
+    }
+
+    .layui-header .layui-nav-item .layui-breadcrumb a:nth-last-child(2) {
+        color: #666 !important;
+    }
+
+    /*图标默认颜色修复，指定 .layui-icon 去掉improtant，否则无法设置图标其他颜色*/
+    .layui-header .layui-nav-item .layui-icon {
+        color: #666;
+    }
+
+    /*取消默认a标签的padding:0 20px，否则扩大图标后容器变形*/
+    .layui-header .layui-nav-item > a {
+        padding: 0 !important;
+    }
+
+    /*扩大图标尺寸与所在容器大小一致，默认大小导致鼠标必须点击图标才能触发事件效果*/
+    .layui-header .layui-nav-item .layui-icon {
+        height: 50px;
+        padding: 20px;
+    }
+
+    /*增加鼠标经过图标时改变图标颜色，颜色为当前系统主题色*/
+    .layui-header .layui-nav-item .layui-icon:hover {
+        color: var(--global-primary-color) !important;
+    }
+
+    .grey-mode {
+        filter: grayscale(1);
+    }
+
+    .side-menu-wrapper {
+        width: 100%;
+        overflow-y: auto;
+        height: calc(100% - 52px);
+        display: flex;
+    }
+
+    .side-menu-wrapper::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .side-menu-wrapper::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background-color: rgb(40, 51, 62);
+    }
+
+    .light .side-menu-wrapper::-webkit-scrollbar-thumb {
+        background-color: #e2e2e2;
+    }
+
+    .side-menu1 {
+        width: 60px;
+        flex: 0 0 60px;
+        border-right: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .light .side-menu1 {
+        border-right: 1px solid whitesmoke;
+    }
+
+    .side-menu2 {
+        flex: 1;
+    }
+
+    .changeBgc {
+        background-color: #171717 !important;
+    }
+
+    .underpainting .layui-tab-title .layui-this {
+        color: var(--global-primary-color) !important;
+        border-bottom: 2px solid var(--global-primary-color) !important;
+        background-color: #009b8e0d !important;
+    }
+
+    .underpainting .layui-tab-title .layui-this .layui-icon {
+        color: var(--global-primary-color) !important;
+    }
+
+    .layui-body > .global-tab > .layui-tab > .layui-tab-head > .layui-tab-title > li {
+        height: 38px;
+        line-height: 38px;
+    }
+
+
+    .designer {
+        padding-left: 5px;
+        box-sizing: border-box;
+    }
+
+    .designer .layui-tab-head {
+        background-color: unset !important;
+    }
+
+    .designer .layui-tab-title {
+        background-color: unset !important;
+    }
+
+    .designer .layui-tab-title > li {
+        background-color: #fff;
+        margin: 5px 0 0 5px;
+        border-radius: 4px;
+        height: 32px !important;
+        line-height: 32px !important;
+    }
+
+</style>
+{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{/block}

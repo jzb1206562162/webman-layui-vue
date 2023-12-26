@@ -1,0 +1,369 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<lay-container fluid="true" class="file-box">
+    <lay-card>
+        <lay-form style="margin-top: 10px">
+            <lay-row>
+                <lay-col :md="5">
+                    <lay-form-item label="文件名称" label-width="80">
+                        <lay-input v-model="searchQuery.name" placeholder="请输入" size="sm" :allow-clear="true"
+                                   style="width: 98%"></lay-input>
+                    </lay-form-item>
+                </lay-col>
+                <lay-col :md="5">
+                    <lay-form-item label="文件分类" label-width="80">
+                        <lay-select v-model="searchQuery.category" placeholder="请选择" :options="category1">
+                        </lay-select>
+                    </lay-form-item>
+                </lay-col>
+                <lay-col :md="5">
+                    <lay-form-item label="扩展名" label-width="80">
+                        <lay-input v-model="searchQuery.ext" placeholder="请输入" size="sm" :allow-clear="true"
+                                   style="width: 98%"></lay-input>
+                    </lay-form-item>
+                </lay-col>
+
+                <lay-col :md="5">
+                    <lay-form-item label-width="20">
+                        <lay-button style="margin-left: 20px" type="normal" size="sm" @click="toSearch">查询
+                        </lay-button>
+                        <lay-button size="sm" @click="toReset"> 重置</lay-button>
+                    </lay-form-item>
+                </lay-col>
+            </lay-row>
+        </lay-form>
+    </lay-card>
+    <!-- table -->
+    <div class="table-box">
+        <lay-table :height="tableHeight" class="table-style" :page="page" :columns="columns"
+                   :loading="loading" :default-toolbar="true" :data-source="dataSource"
+                   v-model:selected-keys="selectedKeys" @change="change" @sort-change="sortChange">
+            <template v-slot:file_path="{ row,rowIndex }">
+                <div v-if="['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].indexOf(row.ext) !== -1">
+                    <img :src="row.url" style="max-width:100px;max-height:100px;"  @click="
+                   showPhotos(row.url)  "   />
+                </div>
+                <div v-else>
+                    <a style="color: #1677ff" href="{{row.url}}}" target="_blank">{{row.url}}}</a>;
+                </div>
+
+            </template>
+            <template v-slot:file_size="{row}">
+                {{formatSize(row.file_size)}}
+            </template>
+            <template v-slot:category="{row}">
+                {{ findNameByValue(row.category) }}
+            </template>
+
+            <template v-slot:toolbar>
+                <lay-button size="sm" type="primary" @click="toImport(0)">
+                    <lay-icon class="layui-icon-upload-drag"></lay-icon>
+                    上传
+                </lay-button>
+                <lay-button size="sm" @click="toRemove(0)">
+                    <lay-icon class="layui-icon-delete"></lay-icon>
+                    删除
+                </lay-button>
+            </template>
+            <template v-slot:operator="{ row }">
+                {if !$ext}
+                <lay-button size="sm" type="primary" @click="toImport(row)">
+                    编辑
+                </lay-button>
+                <lay-button size="xs" border="green" border-style="dashed" @click="toDownload(row)">下载</lay-button>
+                <lay-button size="xs" border="red" border-style="dashed" @click="toRemove(row)">删除</lay-button>
+                {else /}
+                <lay-button size="xs" border="red" border-style="dashed" @click="choose(row)">选择</lay-button>
+                {/if}
+            </template>
+        </lay-table>
+    </div>
+
+    <lay-layer v-model="visibleImport" title="导入文件" :area="['380px', '380px']">
+
+        <lay-select v-model="model_add.category" placeholder="请选择" :options="category1" style="margin:10px 60px  ;">
+
+        </lay-select>
+
+        <lay-upload v-if="!model_add.id" :before-upload="beforeUpload10" style="margin: 5px 60px"
+                    :url="uploadUrl" @done="doneupload" :data="model_add"
+                    field="file" :auto="true" :drag="true">
+        </lay-upload>
+        <div v-if="!model_add.id" style="width: 100%; text-align: center">
+            只能上传小于1MB的文件
+        </div>
+
+        <lay-button v-if="model_add.id" size="sm" type="primary" @click="toSubmit" style="margin-left: 45%">保存
+        </lay-button>
+    </lay-layer>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+<script setup lang="ts">
+
+    const searchQuery = ref({
+        ext: '{$ext}',
+        name: '',
+        category: '',
+        page: 1,
+        limit: 10
+    })
+    // /admin/dict/get/upload
+    const visibleImport = ref(false)
+    const model_add = ref({
+        category: '1',
+        id: 0
+    })
+    const category1 = ref([])
+    const uploadUrl = '/app/admin/upload/insert?'
+
+    async function getcategory() {
+        let res = await get('/app/admin/dict/get/upload')
+        if (res) {
+            category1.value = res.data.map(item => {
+                return {label: item.name, value: item.value};
+            });
+        }
+    }
+
+    async function toImport(row) {
+        model_add.value.category = row ? row.category : '1'
+        model_add.value.id = row ? row.id : 0
+        await getcategory()
+        visibleImport.value = true
+    }
+
+    function toReset() {
+        searchQuery.value = {
+            ext: '',
+            name: '',
+            category: '',
+            page: 1,
+            limit: 10
+        }
+    }
+
+    async function toSubmit() {
+        let res = await ajax('/app/admin/upload/update?', model_add.value)
+        if (res.code === 0) {
+            await onLoad();
+        }
+    }
+
+    function toSearch() {
+        page.current = 1
+        onLoad()
+    }
+
+    function toDownload(row) {
+        downloadFile(row.url)
+        layer.msg('下载成功！')
+    }
+
+    const loading = ref(false)
+    const selectedKeys = ref([])
+    const page = reactive({current: 1, limit: 10, total: 100})
+    const columns = ref([
+        {title: '选项', width: '55px', type: 'checkbox', fixed: 'left'},
+        {title: 'id', width: '55px', key: 'id'},
+        {title: '文件名称', key: 'name', sort: 'desc', ellipsisTooltip: true},
+        {title: '文件路径', key: 'url', sort: 'desc', customSlot: 'file_path', ellipsisTooltip: true},
+        {title: '文件大小', width: '120px', key: 'file_size', customSlot: 'file_size'},
+
+        {title: '图片宽度', key: 'image_width', sort: 'desc'},
+        {title: '图片高度', key: 'image_height', sort: 'desc'},
+        {title: '扩展名', key: 'ext', sort: 'desc'},
+        {title: '类别', key: 'category', sort: 'desc' ,customSlot:'category'},
+        {title: '创建时间', key: 'created_at', sort: 'desc'},
+        {
+            title: '操作',
+            width: '150px',
+            customSlot: 'operator',
+            key: 'operator',
+            fixed: 'right'
+        }
+    ])
+    const change = (page) => {
+        searchQuery.value.page = page.current;
+        searchQuery.value.limit = page.limit;
+        onLoad()
+    }
+    const sortChange = (key, sort) => {
+        //layer.msg(`字段${key} - 排序${sort}, 你可以利用 sort-change 实现服务端排序`)
+    }
+    const dataSource = ref([])
+
+    function toRemove(row) {
+        if (!row && selectedKeys.value.length === 0) {
+            layer.msg('您未选择数据，请先选择要删除的数据', {icon: 3, time: 2000})
+            return
+        }
+        let data, title = '删除警告', msg = '确定要删除此条数据吗'
+        if (row) {
+            data = {id: row.id};
+        } else {
+            console.log(selectedKeys.value)
+            data = {id: selectedKeys.value}
+            msg = '确定要删除所选择的' + selectedKeys.value.length + '条数据吗'
+        }
+        deleteData('/app/admin/upload/delete', data, this, 'onLoad', false, title, msg)
+    }
+
+
+    const beforeUpload10 = (file) => {
+        var isOver = true
+        if (file.size > 1024 * 1024) {
+            isOver = false
+            layer.msg(`文件不能超过1MB`, {icon: 2})
+        }
+        return isOver
+    }
+
+    async function doneupload(res) {
+        res = JSON.parse(res.data)
+        if (res.code === 0) { //上传成功
+            onLoad()
+            layer.msg(res.msg, {time: 1000, icon: 1});
+        } else {
+            layer.msg(res.msg, {icon: 2, time: 3000})
+        }
+    }
+
+    const tableHeight = ref('500px');
+
+    const  imglist=ref([]);
+    async function onLoad(bool = false) {
+        if (bool) toReset();
+        let res = await get('/app/admin/upload/select', true, searchForSettings())
+        if (res) {
+            dataSource.value = res.data;
+            imglist.value =res.data.map(item => item.url);
+            page.total = res.count;
+        }
+        visibleImport.value = false
+    }
+
+    function searchForSettings() {
+        return deepClone(searchQuery.value);
+    }
+
+    function formatSize(value) {
+        if (null == value || "" === value) {
+            return "0 Bytes";
+        }
+        let unitArr = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+        let index = 0;
+        let srcSize = parseFloat(value);
+        index = Math.floor(Math.log(srcSize) / Math.log(1024));
+        let size = srcSize / Math.pow(1024, index);
+        size = size.toFixed(2);
+        return size + unitArr[index];
+    }
+
+
+    function findNameByValue(val) {
+        let item = category1.value.find(item => item.value === val);
+        if (item) {
+            return item.label;
+        } else {
+            return '2'; // 或者你可以返回一个默认值或者抛出一个错误
+        }
+    }
+    function choose(option){
+        window.parent.postMessage(deepClone(option), '*');
+
+    }
+</script>
+<script>
+    vue_data = {};
+    vue_setup = {
+        choose,
+        tableHeight,
+        uploadUrl,
+        imglist,
+        findNameByValue,
+        beforeUpload10,
+        toSubmit,
+        formatSize,
+        toRemove,
+        dataSource,
+        sortChange,
+        change,
+        columns,
+        page,
+        selectedKeys,
+        loading,
+        toDownload,
+        toSearch,
+        toReset,
+        toImport,
+        visibleImport,
+        searchQuery,
+        searchForSettings,
+        category1, doneupload, model_add,
+        onLoad,getcategory,showPhotos
+    };
+    methods = {};
+    watch = {};
+    computed = {};
+    mounted = function () {
+        onLoad();
+        getcategory();
+        tableHeight.value = (document.documentElement.scrollHeight || document.body.scrollHeight) - 153 + 'px';
+    };
+    updated = function () {
+    };
+    <!--只需要专注于data,method等函数就行-->
+</script>
+<style scoped>
+    .layui-upload-list {
+        top: 0;
+        left: 0
+    }
+
+    .file-box {
+        padding: 10px 15px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .top-search {
+        margin-top: 10px;
+        padding: 10px;
+        height: 40px;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    .table-box {
+        margin-top: 10px;
+        padding: 10px;
+        width: 100%;
+        border-radius: 4px;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+
+    .search-input {
+        display: inline-block;
+        width: 98%;
+        margin-right: 10px;
+    }
+
+    .table-style {
+        margin-top: 10px;
+    }
+
+    .isChecked {
+        display: inline-block;
+        background-color: #e8f1ff;
+        color: red;
+    }
+</style>
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}

@@ -1,0 +1,55 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+
+    <lay-card class="error-page">
+        <lay-exception status="403" title="403" describe="抱歉，{$msg?:'你无权访问该页面'}">
+            <template #extra>
+                <lay-button @click="reload"> 刷新</lay-button>
+                <lay-button type="primary">返回</lay-button>
+            </template>
+        </lay-exception>
+    </lay-card>
+
+
+{/block}
+{block name="afterDiv"}
+<script>
+    methods={
+        reload(){
+            location.reload();
+        }
+    }
+</script>
+<style>
+    #app {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        box-sizing: border-box;
+        overflow: hidden;
+        height: calc(100% - 20px);
+        width: calc(100% - 20px);
+        background: #fff;
+    }
+
+    #app > .error-page {
+        margin-top: 250px;
+        box-shadow: 0 0 0 #fff;
+    }
+    .error-403 {
+        width: 50%;
+        float: right;
+    }
+
+    .layui-exception-details-title {
+        line-height: normal;
+    }
+</style>
+
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{__block__}{/block}
+{block name="mountApp"}{__block__}{/block}

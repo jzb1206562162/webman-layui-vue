@@ -1,0 +1,42 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+        <div >页面div内容</div>
+<!--注意,layui-vue组件的属性方法在div中不能用驼峰法,要用-分开,即:dateWidth=""是错误的,要:date-width=""-->
+<!-- <v-chart class="main" :option="option" autoresize></v-chart>"-->
+{/block}
+{block name="afterDiv"}
+<script>
+    vue_data={
+
+    };
+    vue_setup={};
+    methods={
+        onLoad(){
+                console.log('页面初始化请求数据并加载')
+        },
+    };
+    watch={};
+    computed={};
+    mounted = function () {
+        this.onLoad();
+    };
+    updated = function () {
+    };
+    <!--只需要专注于data,method等函数就行-->
+</script>
+<!--按上述内容修改此block-->
+<!--注意,在子模板js里写注释时,要在注释的//前加上空格,不要挨着代码;比如下面示例 -->
+<!--data(){//我是注释       这种js写法会报错,注释的//距离{太近-->
+<!--data(){ //我是注释      这种js写法才正确,注释符合// 前面有空格隔开 -->
+<!--注意,在子模板js里写注释时,要在注释的//前加上空格,不要挨着代码;比如上方示例 -->
+<!-- //think-template文档写法参见https://www.kancloud.cn/manual/think-template/1286412 -->
+<style lang="less"></style>
+
+
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}

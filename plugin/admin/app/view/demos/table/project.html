@@ -1,0 +1,205 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<lay-container :fluid="true" style="padding: 10px">
+    <lay-row :space="10">
+        <lay-col :md="24">
+            <lay-card>
+                <lay-form style="margin-top: 20px">
+                    <lay-row>
+                        <lay-col :md="4">
+                            <lay-form-item :label-width="0">
+                                <lay-input
+                                        v-model="searchTitle"
+                                        style="width: 100%"
+                                ></lay-input>
+                            </lay-form-item>
+                        </lay-col>
+                        <lay-col :md="6">
+                            <lay-form-item label-width="0">
+                                <lay-button type="primary" style="margin-left: 10px" @click="toSearch">查询</lay-button>
+                                <lay-button @click="toReset">重置</lay-button>
+                            </lay-form-item>
+                        </lay-col>
+                    </lay-row>
+                </lay-form>
+            </lay-card>
+        </lay-col>
+        <lay-col :md="24">
+            <!-- <lay-card> -->
+            <lay-row :space="10">
+                <lay-col :md="6" v-for="(item, index) in dataSource" :key="index">
+                    <lay-card class="card-list-item">
+                        <img
+                                src="https://gw.alipayobjects.com/zos/rmsportal/iXjVmWVHbCJAyqvDxdtx.png"
+                        />
+                        <div class="button-list">
+                            <div class="title">layui-vue</div>
+                            <div class="content">
+                                layui - vue（谐音：类 UI) 是 一 套 Vue 3.0 的 桌 面 端 组 件
+                                库
+                            </div>
+                            <div class="time-avater">
+                                12小时前
+                                <div style="flex: 1; text-align: right">
+                                    <lay-avatar-list>
+                                        <lay-tooltip :visible="visible" trigger="click" content="假装这里有文字提示">
+                                            <lay-avatar :src="src" size="sm" radius></lay-avatar>
+                                        </lay-tooltip>
+                                        <lay-tooltip :visible="visible" trigger="click" content="假装这里有文字提示">
+                                            <lay-avatar :src="src" size="sm" radius></lay-avatar>
+                                        </lay-tooltip>
+                                        <lay-tooltip :visible="visible" trigger="click" content="假装这里有文字提示">
+                                            <lay-avatar :src="src" size="sm" radius></lay-avatar>
+                                        </lay-tooltip>
+                                    </lay-avatar-list>
+                                </div>
+                            </div>
+                        </div>
+                    </lay-card>
+                </lay-col>
+            </lay-row>
+
+            <!-- </lay-card> -->
+        </lay-col>
+      <lay-page v-model="page.current" :total="page.total" :limit="page.limit" :show-page="true"></lay-page>
+    </lay-row>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+<script>
+    vue_data = {
+        page: ref({total: 100, limit: 10, current: 2}),
+        dataSource: reactive([
+            {
+                id: '1',
+                username: 'shana',
+                password: '夏娜',
+                remark: '花开堪折直须折,莫待无花空折枝',
+                age: '22'
+            },
+            {
+                id: '2',
+                username: 'shana',
+                password: '夏娜',
+                remark: '花开堪折直须折,莫待无花空折枝',
+                age: '22'
+            },
+            {
+                id: '3',
+                username: 'shana',
+                password: '夏娜',
+                remark: '花开堪折直须折,莫待无花空折枝',
+                age: '22'
+            },
+            {
+                id: '4',
+                username: 'shana',
+                password: '夏娜',
+                remark: '花开堪折直须折,莫待无花空折枝',
+                age: '22'
+            },
+            {
+                id: '5',
+                username: 'shana',
+                password: '夏娜',
+                remark: '花开堪折直须折,莫待无花空折枝',
+                age: '22'
+            },
+            {
+                id: '6',
+                username: 'shana',
+                password: '夏娜',
+                remark: '花开堪折直须折,莫待无花空折枝',
+                age: '22'
+            },
+            {
+                id: '7',
+                username: 'shana',
+                password: '夏娜',
+                remark: '花开堪折直须折,莫待无花空折枝',
+                age: '22'
+            },
+            {
+                id: '8',
+                username: 'shana',
+                password: '夏娜',
+                remark: '花开堪折直须折,莫待无花空折枝',
+                age: '22'
+            }
+        ]),
+        src: ref('https://foruda.gitee.com/avatar/1677022544584087390/4835367_jmysy_1578975358.png'),
+        visible: ref(false),
+        searchTitle: ref(''),
+    };
+    vue_setup = {};
+    methods = {
+        onLoad() {
+            console.log('页面初始化请求数据并加载')
+        },
+        toSearch() {
+            layer.load(2, {time: 3000})
+        },
+        toReset() {
+            this.searchTitle = ''
+        }
+    };
+    watch = {};
+    computed = {};
+    mounted = function () {
+        this.onLoad();
+    };
+    updated = function () {
+    };
+    <!--只需要专注于data,method等函数就行,加载什么的都统统交给模板,当然,模板也不是万能,实在不行你可以选择覆盖appDiv,constApp自行定义app-->
+</script>
+
+<style scoped>
+    .card-list-item .layui-card-body img {
+        width: 100%;
+    }
+
+    .card-list-item .layui-card-body {
+        padding: 0 !important;
+    }
+
+    .layui-card:last-child {
+        border-radius: 4px;
+    }
+
+    .button-list {
+        height: 140px;
+        padding: 10px;
+    }
+
+    .title {
+        font-size: 18px;
+        color: #000000e0;
+        margin: 15px 0 5px;
+    }
+
+    .content {
+        font-size: 14px;
+        color: #ccc;
+    }
+
+    .time-avater {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        color: #ccc;
+        margin-top: 15px;
+    }
+
+    .card-list-item:hover {
+        box-shadow: 2px 2px 14px #ccc;
+        cursor: pointer;
+    }
+</style>
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}

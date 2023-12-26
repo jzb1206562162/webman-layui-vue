@@ -1,0 +1,142 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+
+    <!--head头预定义初始化加载文件,可沿用,合并或覆盖-->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/favicon.ico"/>
+    <title>{block name="title"}{$title?:'后台管理'}{/block}</title>
+    <!--后台全局css-->
+    <link rel="stylesheet" type="text/css" href="/plugin/admin/public/css/index.css">
+    <!--vue,router,vuex-js-->
+    <script src="/plugin/admin/public/js-lib/vue/vue.global@3.3.4.js"></script>
+    <script src="/plugin/admin/public/js-lib/vue/vue-router@4.2.4.js"></script>
+    <script src="/plugin/admin/public/js-lib/vue/vuex.global@4.1.js"></script>
+    <!--layui-vue-主css,js-->
+    <link rel="stylesheet" href="/plugin/admin/public/ui-lib/layui-vue/layui-vue@2.13.0.css"/>
+    <script src="/plugin/admin/public/ui-lib/layui-vue/layui-vue@2.13.0.js"></script>
+    <!--axios-js-->
+    <script src="/plugin/admin/public/js-lib/axios/axios.min.js"></script>
+    <!--layui-vue-全局自定义-js,css-->
+    <link rel="stylesheet" href="/plugin/admin/public/ui-lib/layui-vue/layui-vue-template.css"/>
+    <script src="/plugin/admin/public/ui-lib/layui-vue/layui-vue-template.js"></script>
+    <!-- 阻止默认事件   -->
+    <script type="text/javascript" src="/plugin/admin/public/js-lib/vue/default-passive-events.js"></script>
+
+    {block name="header"}
+    <!--head其他js.css引用资源预留-->
+    {/block}
+</head>
+<script>
+    const {createApp, ref, reactive, provide, inject, defineComponent} = Vue;
+    const {layer, useI18n} = LayuiVue;
+    //备用axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
+    //备用axios.defaults.headers["Content-Type"] = "application/x-www-form-urlencoded";
+    axios.defaults.headers["Content-Type"] = "multipart/form-data";
+    axios.defaults.headers["X-CSRF-Token"] = "";
+
+    var vue_data = {}, vue_setup = {}, vue_provide = {}, methods = {}, watch = {}, computed = {},
+        beforeCreate = function () {
+        }, created = function () {
+        }, beforeMount = function () {
+        }, mounted = function () {
+        }, beforeUpdate = function () {
+        }, updated = function () {
+        }, beforeUnmount = function () {
+        }, unmounted = function () {
+        }, errorCaptured = function () {
+        };
+</script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/useAppStore.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/useUserStore.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/zh_CN.js"></script>
+<script src="/plugin/admin/public/ui-lib/layui-vue-component/en_US.js"></script>
+{block name="beforeDiv"}
+<script>
+    //加载其它需要用到vue,res,reactive等变量的js放在这里
+</script>
+<!--div前置内容,可写js,css等-->
+{/block}
+<body>
+
+<div id="app" v-cloak>
+    {block name="app"}
+    <!--lay-config-provider是为了全局主题颜色一致而写的,不想继承全局主题可以直接继承app而非addDiv,比如登录页;一般只需默认改写addDiv-->
+    <template v-if="true">
+        <lay-config-provider :theme-variable="appStore.themeVariable" :theme="appStore.theme"
+                             :locales="locales" :locale="appStore.locale">
+            {block name="appDiv"} <!--div实际内容-->{/block}
+        </lay-config-provider>
+    </template>
+    {/block}
+</div>
+
+{block name="afterDiv"}
+<!--div后置内容,可写js,css等-->
+<script>console.log('此处写js代码')</script>
+<style lang="less"></style>
+<!--按上述内容覆盖此block-->
+<!--注意,在子模板继承这个模板后,请在子模板js里写注释时,要在注释的//前加上空格,不要挨着代码;比如下面示例 -->
+<!--data(){//我是注释       这种js写法会报错,注释的//距离{太近-->
+<!--data(){ //我是注释      这种js写法才正确,注释符合// 前面有空格隔开 -->
+<!--注意,在子模板继承这个模板后,请在子模板js里写注释时,要在注释的//前加上空格,不要挨着代码;比如上方示例 -->
+{/block}
+{block name="constApp"}
+<script>
+    //预定义constApp,若感觉不合适,请加载模板后覆盖constApp区块预定义,不要直接修改此处代码
+    vue_data.locales = [
+        {name: 'zh_CN', locale: zh_CN, merge: true},
+        {name: 'en_US', locale: en_US, merge: true}
+    ];
+    const App = {
+        data() {
+            return vue_data
+        },
+        setup() {
+            const {t} = useI18n(); //语言,要配合<lay-config-provider >组件使用,大部分情况下无需使用
+            const appStore = reactive(useAppStore);//全局配置
+            const userStore = reactive(useUserStore);//用户信息
+            vue_setup.t = t
+            vue_setup.appStore = appStore
+            vue_setup.userStore = userStore
+            return vue_setup
+        },
+        provide() {
+            return vue_provide
+        },
+        methods: methods,//方法
+        watch: watch,//侦听器
+        computed: computed,//计算属性
+        //(创建前,在此生命周期函数执行的时候，data和methods中的数据都还没有初始化
+        beforeCreate,
+        //(创建后,在此生命周期函数中，data和methods都已经被初始化好了，如果要调用 methods中的方法，或者操作data中的数 据，最早只能在created中操作
+        created,
+        //载入前,在此生命周期函数执行的时候，模板已经在内存中编译好了，但是尚未挂载到页面中去，此时页面还是旧的。
+        beforeMount,
+        //载入后,此时页面和内存中都是最新的数据，这个钩子函数是最早可以操作dom节点的方法。
+        mounted,
+        //更新前)：此时页面中显示的数据还是旧的，但是data中的数据是最新的，且页面并未和最新的数据同步。
+        beforeUpdate,
+        //更新后)：此时页面显示数据和最新的data数据同步。
+        updated,
+        //销毁前)：在一个组件实例被卸载之前调用。当执行该生命周期函数的时候，实例身上所有的data，所有的methods以及过滤器…等都处于可用状态，并没有真正执行销毁。
+        beforeUnmount,
+        //destroyed(销毁后)：在一个组件实例被卸载之后调用。此时组件以及被完全销毁，实例中的所有的数据、方法、属性、过滤器…等都已经不可用了。
+        unmounted,
+        //在捕获了后代组件传递的错误时调用。
+        errorCaptured,
+    };
+    const app = Vue.createApp(App);
+    app.use(LayuiVue);
+</script>
+{/block}
+{block name="plugins"}
+<!--script-vue插件预定义位置-->
+{/block}
+{block name="mountApp"}
+<script>  app.mount("#app");</script>
+{/block}
+</body>
+</html>

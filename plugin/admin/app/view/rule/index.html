@@ -1,0 +1,316 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<lay-container fluid="true" class="menu-box">
+
+    <div class="table-box">
+        <lay-table
+                :height="tableHeight" ref="tableRef6" :loading="loading" children-column-name="children"
+                :columns="columns6"
+                :data-source="dataSource6" :default-toolbar="true" :default-expand-all="defaultExpandAll6"
+                :expand-index="1">
+            <template #toolbar>
+                <!--                <lay-button type="primary" size="sm" @click="getCheckData6">获取选中数据</lay-button>-->
+                <lay-button size="sm" @click="changeVisible11('新建', 0)" type="normal">
+                    新建
+                </lay-button>
+                <lay-button size="sm" @click="expandAll6(true)">展开全部</lay-button>
+                <lay-button size="sm" @click="expandAll6(false)">折叠全部</lay-button>
+
+                <lay-icon type="layui-icon-refresh" @click="onLoad" style="float: right"></lay-icon> &nbsp;
+            </template>
+            <template #name="{ row }">
+                <lay-icon :class="row.icon"></lay-icon> &nbsp;&nbsp;
+                {{ row.name }}
+            </template>
+            <template #option="{ row }">
+                <lay-button @click="changeVisible11('新建', row.id)" size="xs" border="blue" border-style="dashed">
+                    添加
+                </lay-button>
+                <lay-button @click="changeVisible11('修改', row)" size="xs" border="green" border-style="dashed">
+                    修改
+                </lay-button>
+                <lay-button @click="toRemove(row.id)" size="xs" border="red" border-style="dashed">
+                    删除
+                </lay-button>
+            </template>
+            <template #type="{ row }">
+                <div v-show="row.type == '0'">
+                    <lay-tag color="#165DFF" variant="light">目录</lay-tag>
+                </div>
+                <div v-show="row.type == '1'">
+                    <lay-tag color="#2dc570" variant="light">菜单</lay-tag>
+                </div>
+                <div v-show="row.type == '2'">
+                    <lay-tag color="#FFB800" variant="light">权限</lay-tag>
+                </div>
+                <div v-show="row.type == '3'">
+                    <lay-tag color="#F5319D" variant="light">外链(弹窗)</lay-tag>
+                </div>
+                <div v-show="row.type == '4'">
+                    <lay-tag color="#F5319D" variant="light">外链(新窗口)</lay-tag>
+                </div>
+            </template>
+        </lay-table>
+    </div>
+
+    <lay-layer v-model="visible11" :title="title" :area="['700px', '370px']">
+        <div style="padding: 20px">
+            <lay-form :model="model11" ref="layFormRef11">
+                <lay-row>
+                    <lay-col md="12">
+                        <lay-form-item label="菜单名称" prop="title" required>
+                            <lay-input v-model="model11.title"></lay-input>
+                        </lay-form-item>
+                    </lay-col>
+                    <lay-col md="12">
+                        <lay-form-item label="类型" prop="type" required>
+                            <lay-select v-model="model11.type" style="width: 100%">
+                                <lay-select-option value="0" label="目录"></lay-select-option>
+                                <lay-select-option value="1" label="菜单"></lay-select-option>
+                                <lay-select-option value="2" label="权限"></lay-select-option>
+                                <lay-select-option value="3" label="外链(弹窗)"></lay-select-option>
+                                <lay-select-option value="4" label="外链(新窗口)"></lay-select-option>
+                            </lay-select>
+
+                        </lay-form-item>
+                    </lay-col>
+                </lay-row>
+                <lay-row>
+                    <lay-col md="8">
+                        <lay-form-item label="图标" prop="icon">
+                            <lay-icon-picker v-model="model11.icon" :allow-clear="true"></lay-icon-picker>
+                        </lay-form-item>
+                    </lay-col>
+                    <lay-col md="8">
+                        <lay-form-item label="排序" prop="weight" required>
+                            <lay-input-number style="width: 100%" v-model="model11.weight"
+                                              position="right"></lay-input-number>
+                        </lay-form-item>
+                    </lay-col>
+                    <lay-col md="8">
+                        <lay-form-item label="父菜单ID" prop="pid" required>
+                            <lay-input type="number" v-model="model11.pid"></lay-input>
+                        </lay-form-item>
+                    </lay-col>
+                </lay-row>
+                <lay-row>
+                    <lay-form-item label="标识" prop="key" required>
+                        <lay-input v-model="model11.key"></lay-input>
+                    </lay-form-item>
+                    <lay-form-item label="路径url" prop="href">
+                        <lay-input v-model="model11.href"></lay-input>
+                    </lay-form-item>
+                </lay-row>
+            </lay-form>
+            <div style="width: 97%; text-align: right">
+                <lay-button size="sm" type="primary" @click="submit11">保存</lay-button>
+                <lay-button size="sm" @click="toCancel">取消</lay-button>
+            </div>
+        </div>
+    </lay-layer>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+
+<script setup lang="ts">
+
+    const loading = ref(false)
+    const tableRef6 = ref()
+
+    const columns6 = ref([
+        {
+            fixed: 'left',
+            type: 'checkbox',
+            title: '复选'
+        },
+
+
+        {
+            title: '菜单名称',
+            key: 'name',
+            customSlot: 'name'
+        },
+        {
+            title: 'ID',
+            key: 'id',
+            width: '50'
+        },
+        {
+            title: '标识',
+            key: 'key'
+        },
+        {
+            title: '路径',
+            key: 'href'
+        },
+        {
+            title: '排序',
+            width: '80',
+            key: 'weight'
+        },
+        {
+            title: '类型',
+            key: 'type',
+            customSlot: 'type',
+            width: '80'
+        },
+        {
+            title: '操作',
+            key: 'option',
+            customSlot: 'option'
+        }
+    ])
+
+    const dataSource6 = ref();
+    const getCheckData6 = function () {
+        layer.msg(tableRef6.value.getCheckData())
+    }
+
+    const defaultExpandAll6 = ref(false)
+
+    const expandAll6 = function (flag) {
+        defaultExpandAll6.value = flag
+    }
+    const model11 = ref({
+        title: '',
+        type: '',
+        pid: 0,
+        icon: '',
+        key: '',
+        href: '',
+        weight: 1
+    })
+    const layFormRef11 = ref()
+    const visible11 = ref(false)
+
+    const title = ref('新增')
+    const changeVisible11 = (text, row) => {
+        title.value = text
+        if (text === '修改') {
+            model11.value = JSON.parse(JSON.stringify(row))
+            model11.value.type = (model11.value.type.toString());
+        } else {
+            model11.value = {
+                title: '',
+                type: '',
+                pid: row,
+                icon: '',
+                key: '',
+                href: '',
+                weight: 0
+            }
+        }
+        visible11.value = !visible11.value
+    }
+    const submit11 = function () {
+        layFormRef11.value.validate(async (isValidate, model, errors) => {
+            model.children = [];
+            if (isValidate) {
+                let res
+                if (model.id) {
+                    res = await ajax('/app/admin/rule/update', model)
+                } else {
+                    res = await ajax('/app/admin/rule/insert', model)
+                }
+
+                if (res) {
+                    await onLoad();
+                }
+            }
+        })
+    }
+
+
+    function toRemove(id) {
+        deleteData('/app/admin/rule/delete', {id}, this, 'onLoad')
+    }
+
+    function toCancel() {
+        visible11.value = false
+    }
+
+    async function onLoad() {
+        let res = await get('/app/admin/rule/select?format=tree&type=0,1,2,3,4,5')
+        if (res) dataSource6.value = res.data
+        visible11.value = false
+    }
+</script>
+<script setup lang="ts">
+    const tableHeight = ref('500px');
+    vue_data = {};
+    vue_setup = {
+        tableHeight,
+        toCancel,
+        toRemove,
+        submit11,
+        changeVisible11,
+        title,
+        visible11,
+        layFormRef11,
+        model11,
+        expandAll6,
+        defaultExpandAll6,
+        getCheckData6,
+        dataSource6,
+        columns6,
+        tableRef6,
+        loading,
+        onLoad,
+    };
+    methods = {};
+    watch = {};
+    computed = {};
+    mounted = function () {
+        onLoad();
+        tableHeight.value = (document.documentElement.scrollHeight || document.body.scrollHeight) - 50 + 'px';
+    };
+    updated = function () {
+    };
+</script>
+<style scoped>
+    .menu-box {
+        padding: 10px 15px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .top-search {
+        margin-top: 10px;
+        padding: 10px;
+        height: 40px;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    .table-box {
+        margin-top: 10px;
+        padding: 10px;
+        width: 100%;
+        border-radius: 4px;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+
+    .search-input {
+        display: inline-block;
+        width: 98%;
+        margin-right: 10px;
+    }
+
+    .table-style {
+        margin-top: 10px;
+    }
+
+    .isChecked {
+        display: inline-block;
+        background-color: #e8f1ff;
+        color: red;
+    }
+</style>
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}

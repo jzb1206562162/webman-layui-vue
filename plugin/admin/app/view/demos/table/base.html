@@ -1,0 +1,245 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<lay-container fluid="true" style="padding: 10px">
+    <lay-row :space="10">
+        <lay-col :md="24">
+            <lay-card>
+                <lay-form style="margin-top: 20px">
+                    <lay-row>
+                        <lay-col :md="6">
+                            <lay-form-item label="账号：" label-width="50">
+                                <lay-input
+                                        v-model="searchAccount"
+                                        style="width: 90%"
+                                ></lay-input>
+                            </lay-form-item>
+                        </lay-col>
+                        <lay-col :md="6">
+                            <lay-form-item label="邮箱：" label-width="50">
+                                <lay-input
+                                        v-model="searchEmail"
+                                        style="width: 90%"
+                                ></lay-input>
+                            </lay-form-item>
+                        </lay-col>
+                        <lay-col :md="6">
+                            <lay-form-item label-width="0">
+                                <lay-button type="primary" @click="toSearch">查询</lay-button>
+                                <lay-button @click="toReset">重置</lay-button>
+                            </lay-form-item>
+                        </lay-col>
+                    </lay-row>
+                </lay-form>
+            </lay-card>
+        </lay-col>
+        <lay-col :md="24">
+            <lay-card>
+                <lay-table
+                        :page="page"
+                        :columns="columns"
+                        :data-source="dataSource"
+                        :default-toolbar="defaultToolbar"
+                        v-model:selected-keys="selectedKeys"
+                        @row="rowClick"
+                        @change="change"
+                >
+                    <template v-slot:toolbar>
+                        <lay-button size="sm" type="primary">新增</lay-button>
+                        <lay-button size="sm">删除</lay-button>
+                    </template>
+                    <template v-slot:username="{ data }">
+                        {{ data.username }}
+                    </template>
+                    <template v-slot:password="{ data }">
+                        {{ data.password }}
+                    </template>
+                    <template v-slot:operator="{}">
+                        <lay-button size="xs" type="primary">修改</lay-button>
+                        <lay-button size="xs">删除</lay-button>
+                    </template>
+                    <template v-slot:footer>
+                        {{ selectedKeys }}
+                    </template>
+                </lay-table>
+            </lay-card>
+        </lay-col>
+    </lay-row>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+<script>
+
+
+    const columns =reactive( [
+        {
+            title: '复选',
+            width: '50px',
+            type: 'checkbox',
+            fixed: 'left'
+        },
+        {
+            title: '账户',
+            width: '200px',
+            customSlot: 'username',
+            key: 'username'
+        },
+        {
+            title: '密码',
+            width: '180px',
+            customSlot: 'password',
+            key: 'password'
+        },
+        {
+            title: '年龄',
+            width: '180px',
+            key: 'age'
+        },
+        {
+            title: '描述',
+            key: 'remark',
+            ellipsisTooltip: true
+        },
+        {
+            title: '操作',
+            width: '180px',
+            customSlot: 'operator',
+            key: 'operator',
+            fixed: 'right'
+        }
+    ]);
+    const dataSource = reactive([
+        {
+            id: '1',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '2',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '3',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '4',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '5',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '6',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '7',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '8',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '9',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '10',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        },
+        {
+            id: '11',
+            username: 'shana',
+            password: '夏娜',
+            remark: '花开堪折直须折,莫待无花空折枝',
+            age: '22'
+        }
+    ]);
+    vue_data = {
+        selectedKeys: ref(['1']),
+        checkbox: ref(true),
+        defaultToolbar: ref(true),
+        page: ref({total: 100, limit: 10, current: 2}),
+        dataSource: deepClone(dataSource),
+        columns: deepClone(columns),
+
+        searchAccount: ref(''),
+        searchEmail: ref('')
+
+    };
+
+    vue_setup = {};
+    methods = {
+        onLoad() {
+            console.log('页面初始化请求数据并加载')
+        },
+        rowClick(data) {
+            console.log('单击')
+            console.log('data')
+        },
+
+        rowDoubleClick(data) {
+            console.log('双击')
+            console.log('data')
+        },
+
+        change({current, limit}) {
+            layer.msg('current:' + current + ' limit:' + limit)
+        },
+
+        toSearch() {
+            layer.load(2, {time: 3000})
+        },
+        toReset() {
+          this.searchAccount = ''
+            this. searchEmail = ''
+        }
+
+    }
+    watch = {};
+    computed = {};
+    mounted = function () {
+        this.onLoad();
+    };
+    updated = function () {
+    };
+    <!--只需要专注于data,method等函数就行,加载什么的都统统交给模板,当然,模板也不是万能,实在不行你可以选择覆盖appDiv,constApp自行定义app-->
+</script>
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}

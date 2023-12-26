@@ -1,0 +1,204 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<lay-container :fluid="true" style="padding: 10px">
+    <lay-row :span="24" style="display: flex">
+        <lay-col style="flex: 1; background-color: #fff" :xs="24">
+            <lay-tab type="brief" v-model="activeTab" @change="changeTab">
+                <lay-tab-item title="基本信息设置" id="activeTab1">
+                    <div class="tab-content">
+                        <lay-form :model="model1" ref="layFormRef1" label-width="80" size="sm" :>
+                            <lay-form-item label="网站名称" prop="title" required>
+                                <lay-input v-model="model1.title" allow-clear></lay-input>
+                            </lay-form-item>
+                            <lay-form-item label="网站Logo" prop="image" required>
+                                <lay-upload url="/app/admin/upload/avatar" field="file" @done="doneHandle">
+                                    <template #preview>
+                                        <div class="easy-wrap">
+                                            <img :src="model1.image"/>
+                                        </div>
+                                    </template>
+                                </lay-upload>
+                                &nbsp;&nbsp;
+                                <lay-button type="primary" @click="selectTheFile">选择文件</lay-button>
+                            </lay-form-item>
+                            <lay-form-item style="text-align: center">
+                                <lay-button type="normal" @click="submit(1)" fluid>提交</lay-button>
+                            </lay-form-item>
+                        </lay-form>
+                    </div>
+                </lay-tab-item>
+                <lay-tab-item title="页面配置" id="activeTab2">
+                    <div class="tab-content">
+                        <lay-form :model="model2" ref="layFormRef2" label-width="80" size="sm" required
+                                  :init-validate="false">
+                            <lay-form-item label="主标签标题" prop="title" required>
+                                <lay-input v-model="model2.title" allow-clear></lay-input>
+                            </lay-form-item>
+                            <lay-form-item label="主标签URL" prop="href" required>
+                                <lay-input v-model="model2.href" allow-clear></lay-input>
+                            </lay-form-item>
+                            <lay-form-item label="主标签ID" prop="id" required>
+                                <lay-input v-model="model2.id" allow-clear></lay-input>
+                            </lay-form-item>
+                            <lay-form-item label="最大标签数" prop="max" required>
+                                <lay-input type="number" v-model="model2.max" min="10" allow-clear></lay-input>
+                            </lay-form-item>
+                            <lay-form-item style="text-align: center">
+                                <lay-button type="normal" @click="submit(2)" fluid>提交</lay-button>
+                            </lay-form-item>
+                        </lay-form>
+                    </div>
+                </lay-tab-item>
+            </lay-tab>
+        </lay-col>
+    </lay-row>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+<script>
+    const activeTab = ref('activeTab1')
+    const model1 = ref({
+        title: '标题',
+        image: '/plugin/admin/public/img/noimg.png'
+    })
+    const model2 = ref({
+        max: 30,
+        title: '仪表盘',
+        href: '/app/admin/index/dashboard',
+        id: 0
+    })
+    const layFormRef1 = ref()
+    const layFormRef2 = ref()
+
+    function selectTheFile() {
+        layer.open({
+            type: "iframe",
+            title: "文件选择",
+            area: ['90%', '90%'],
+            content: "/app/admin/upload/attachment?ext=jpg,jpeg,png,gif,bmp"
+        })
+    }
+
+    function doneHandle(res) {
+        res = JSON.parse(res.data);
+        if (res.code === 0) { //上传成功
+            model1.value.image = res.data.url
+            layer.msg(res.msg, {time: 1000, icon: 1});
+        } else {
+            layer.msg(res.msg, {icon: 2, time: 3000})
+        }
+    }
+
+    function changeTab(event) {
+        let layFormRef = 'layFormRef' + event.replace(/\D/g, "");
+        eval(layFormRef).value.clearValidate()
+    }
+
+    const submit = function (FromNum = 1) {
+        let layFormRef = 'layFormRef' + FromNum;
+        eval(layFormRef).value.validate(async (isValidate, model, errors) => {
+            if (isValidate) {
+                let data = deepClone(model)
+                if (FromNum === 1) data = {logo: data}
+                if (FromNum === 2) {
+                    data.index = {
+                        title: data.title,
+                        href: data.href,
+                        id: data.id,
+                    }
+                    data = {tab: data}
+                }
+                let res = await ajax('/app/admin/config/update', data, false, true)
+                if (res.code === 0) {
+                    setTimeout(function () {
+                        onLoad();
+                    }, 1000);
+                }
+            }
+        })
+    }
+
+
+    async function onLoad(url = '/app/admin/config/get') {
+        let res = await get(url)
+        if (res) {
+            model1.value = res.logo;
+            model2.value = {
+                max: res.tab.max,
+                title: res.tab.index.title,
+                href: res.tab.index.href,
+                id: res.tab.index.id,
+            }
+
+        }
+    }
+
+    vue_data = {};
+    vue_setup = {
+        changeTab, selectTheFile,
+        model1, model2, doneHandle,
+        activeTab,
+        layFormRef1, layFormRef2,
+        submit,
+        onLoad,
+    }
+
+    methods = {};
+    watch = {};
+    computed = {};
+    mounted = function () {
+        onLoad();
+        // 监听来自子页面的消息
+        window.addEventListener('message', function (event) {
+            if (event.data.id) {
+                model1.value.image = event.data.url;
+                layer.closeAll()
+            }
+        });
+
+    };
+    updated = function () {
+    };
+</script>
+
+
+<style scoped>
+    .layui-tag .layui-tag-text {
+        margin: 0 8px 8px 0;
+    }
+
+
+    .tab-content {
+        height: 368px;
+        max-width: 500px;
+        padding: 0 20px;
+        background-color: #fff;
+    }
+
+    .layui-upload-list {
+        float: left;
+        position: static;
+        height: 45px;
+        width: 45px;
+        margin: 0 5px;
+
+    }
+
+    .layui-upload > div:not([class]) {
+        float: right;
+        line-height: 45px;
+    }
+
+    .layui-upload-list img {
+        height: 45px;
+        width: 45px;
+
+    }
+</style>
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}

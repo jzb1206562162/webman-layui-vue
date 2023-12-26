@@ -1,0 +1,379 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<lay-container fluid="true" class="user-box">
+    <lay-card>
+        <lay-form style="margin-top: 10px">
+            <lay-row>
+                <lay-col :md="5">
+                    <lay-form-item label="用户账号" label-width="80">
+                        <lay-input v-model="searchQuery.username" placeholder="请输入"
+                                   size="sm" :allow-clear="true" style="width: 98%"></lay-input>
+                    </lay-form-item>
+                </lay-col>
+                <lay-col :md="5">
+                    <lay-form-item label="用户名" label-width="80">
+                        <lay-input v-model="searchQuery.nickname" placeholder="请输入" size="sm" :allow-clear="true"
+                                   style="width: 98%"></lay-input>
+                    </lay-form-item>
+                </lay-col>
+                <lay-col :md="5">
+                    <lay-form-item label="手机号" label-width="80">
+                        <lay-input v-model="searchQuery.mobile" placeholder="请输入" size="sm" :allow-clear="true"
+                                   style="width: 98%"></lay-input>
+                    </lay-form-item>
+                </lay-col>
+                <lay-col :md="5">
+                    <lay-form-item label-width="20">
+                        <lay-button style="margin-left: 20px" type="primary" size="sm" @click="toSearch">
+                            查询
+                        </lay-button>
+                        <lay-button size="sm" @click="toReset"> 重置</lay-button>
+                    </lay-form-item>
+                </lay-col>
+            </lay-row>
+        </lay-form>
+    </lay-card>
+    <!-- table -->
+    <div class="table-box">
+        <lay-table
+                class="table-style" :page="page" :columns="columns" :loading="loading" :height="tableHeight"
+                :default-toolbar="true" :data-source="dataSource" v-model:selected-keys="selectedKeys"
+                @change="change" @sort-change="sortChange">
+            <template #status="{ row }">
+                <lay-switch :model-value="row.status?true:false" @change="changeStatus($event, row)"></lay-switch>
+            </template>
+            <template #avatar="{ row }">
+                <lay-avatar :src="row.avatar"></lay-avatar>
+            </template>
+            <template #sex="{ row }">
+                {{row.sex ==1?'男':'女'}}
+            </template>
+            <template v-slot:toolbar>
+                <lay-button size="sm" type="primary" @click="changeVisible11('新增')">
+                    <lay-icon class="layui-icon-addition"></lay-icon>
+                    新增
+                </lay-button>
+                <lay-button size="sm" @click="toRemove(0)">
+                    <lay-icon class="layui-icon-delete"></lay-icon>
+                    删除
+                </lay-button>
+            </template>
+            <template v-slot:operator="{ row }">
+                <div >
+                    <lay-button size="xs" type="primary" @click="changeVisible11('编辑', row)">编辑</lay-button>
+                    <lay-button size="xs" border="red" border-style="dashed" @click="toRemove(row)">删除</lay-button>
+                </div>
+            </template>
+        </lay-table>
+    </div>
+
+    <lay-layer v-model="visible11" :title="title" :area="['500px', '550px']">
+        <div style="padding: 20px">
+            <lay-form :model="model11" ref="layFormRef11">
+                <lay-form-item label="登录用户名" prop="username" required>
+                    <lay-input v-model="model11.username"></lay-input>
+                </lay-form-item>
+                <lay-form-item label="昵称" prop="nickname" required>
+                    <lay-input v-model="model11.nickname"></lay-input>
+                </lay-form-item>
+                <lay-form-item label="密码" prop="password" :required="!model11.id">
+                    <lay-input v-model="model11.password" placeholder="不更新密码请留空"></lay-input>
+                </lay-form-item>
+                <lay-form-item label="性别" prop="sex">
+                    <lay-radio v-model="model11.sex" name="sex" value="1" label="男"></lay-radio>
+                    <lay-radio v-model="model11.sex" name="sex" value="0" label="女"></lay-radio>
+                </lay-form-item>
+                <lay-form-item label="手机" prop="mobile">
+                    <lay-input v-model="model11.mobile"></lay-input>
+                </lay-form-item>
+                <lay-form-item label="email" prop="email">
+                    <lay-input v-model="model11.email"></lay-input>
+                </lay-form-item>
+                <lay-form-item label="等级" prop="level">
+                    <lay-input v-model="model11.level"></lay-input>
+                </lay-form-item>
+                <lay-form-item label="生日" prop="birthday">
+                    <lay-date-picker  v-model="model11.birthday"></lay-date-picker>
+                </lay-form-item>
+                <lay-form-item label="余额(元)" prop="money">
+                    <lay-input v-model="model11.money"></lay-input>
+                </lay-form-item>
+                <lay-form-item label="积分" prop="score">
+                    <lay-input v-model="model11.score"></lay-input>
+                </lay-form-item>
+            </lay-form>
+            <div style="width: 100%; text-align: center">
+                <lay-button size="sm" type="primary" @click="toSubmit">保存</lay-button>
+                <lay-button size="sm" @click="toCancel">取消</lay-button>
+            </div>
+        </div>
+    </lay-layer>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+
+<script>
+
+    const searchQuery = ref({
+        username: '',
+        nickname: '',
+        email: '',
+        mobile: '',
+        created_at: [],
+        page: 1,
+        limit: 10
+    })
+
+    function toReset() {
+        console.log(useUserStoreDefault.menus)
+
+        searchQuery.value = {
+            username: '',
+            nickname: '',
+            email: '',
+            mobile: '',
+            created_at: [],
+            page: 1,
+            limit: 10
+        }
+    }
+
+    function toSearch() {
+        searchQuery.value.page = 1
+        page.current = 1
+        onLoad()
+    }
+
+    const loading = ref(false)
+    const selectedKeys = ref([])
+    const page = reactive({
+        current: 1,
+        limit: 10,
+        total: 100,
+        layout: ['count', 'prev', 'page', 'next', 'limits', 'refresh', 'skip']
+    })
+    const columns = ref([
+        {title: '选项', width: '60px', type: 'checkbox', fixed: 'left'},
+        {title: 'ID', width: '80px', key: 'id', fixed: 'left', sort: 'desc'},
+        {title: '头像', width: '50px', key: 'avatar', customSlot: 'avatar'},
+        {title: '用户名', width: '80px', key: 'username', sort: 'desc'},
+        {title: '昵称', width: '80px', key: 'nickname', sort: 'desc'},
+        {title: '性别', width: '80px', key: 'sex', sort: 'desc',customSlot:'sex'},
+        {title: '手机', width: '80px', key: 'mobile', sort: 'desc'},
+        {title: '邮箱', width: '80px', key: 'email', sort: 'desc'},
+        {title: '禁用', width: '80px', key: 'status', customSlot: 'status'},
+        {title: '创建时间', width: '120px', key: 'created_at'},
+        {
+            title: '操作',
+            width: '120px',
+            customSlot: 'operator',
+            key: 'operator',
+            fixed: 'right'
+        }
+    ])
+    const change = (page) => {
+        searchQuery.value.page = page.current;
+        searchQuery.value.limit = page.limit;
+        onLoad()
+    }
+    const sortChange = (key, sort) => {
+        // layer.msg(`字段${key} - 排序${sort}, 你可以利用 sort-change 实现服务端排序`)
+    }
+    const dataSource = ref()
+
+    const changeStatus =   (isChecked, row) => {
+        dataSource.value.forEach(async(item) => {
+            if (item.id === row.id) {
+                let res =await ajax('/app/admin/user/update', {id: item.id, status: isChecked ? 1 : 0}, false)
+                if (res.code === 0) item.status = isChecked
+            }
+        })
+    }
+
+
+    const model11 = ref({})
+    const layFormRef11 = ref()
+    const visible11 = ref(false)
+    const title = ref('新增')
+    const changeVisible11 = async (text, row) => {
+
+
+        title.value = text
+        if (row) {
+            row = deepClone(row)
+            delete row.password;
+            model11.value = row;
+
+        } else {
+            model11.value = {
+                roles: []
+            }
+        }
+        visible11.value = !visible11.value
+    }
+
+    // 清除校验
+    const clearValidate11 = function () {
+        layFormRef11.value.clearValidate()
+    }
+    // 重置表单
+    const reset11 = function () {
+        layFormRef11.value.reset()
+    }
+
+    function toRemove(row) {
+        if (!row && selectedKeys.value.length === 0) {
+            layer.msg('您未选择数据，请先选择要删除的数据', {icon: 3, time: 2000})
+            return
+        }
+        let data, title = '删除警告', msg = '确定要删除此条数据吗'
+        if (row) {
+            data = {id: row.id};
+        } else {
+            console.log(selectedKeys.value)
+            data = {id: selectedKeys.value}
+            msg = '确定要删除所选择的' + selectedKeys.value.length + '条数据吗'
+        }
+        deleteData('/app/admin/user/delete', data, this, 'onLoad', false, title, msg)
+    }
+
+    function toSubmit() {
+        layFormRef11.value.validate(async (isValidate, model, errors) => {
+            if (isValidate) {
+                console.log(model.roles)
+                let data = deepClone(model)
+                let res
+                if (model.id) {
+                    res = await ajax('/app/admin/user/update', data)
+                } else {
+                    res = await ajax('/app/admin/user/insert', data)
+                }
+                if (res.code === 0) {
+                    await onLoad();
+                }
+            }
+        })
+    }
+
+    function toCancel() {
+        visible11.value = false
+    }
+
+
+    function cancel() {
+        layer.msg('您已取消操作')
+    }
+
+    const tableHeight = ref('500px');
+
+    async function onLoad(bool = false) {
+        if (bool) toReset();
+        let res = await get('/app/admin/user/select', true, searchForSettings())
+        if (res) {
+            dataSource.value = res.data;
+            page.total = res.count;
+        }
+        visible11.value = false
+
+    }
+   function searchForSettings(){
+       let data=deepClone(searchQuery.value);
+       data.nickname?data.nickname =['like',data.nickname]:''
+       data.username? data.username=['like',data.username]:''
+       return data;
+    }
+
+</script>
+<script>
+
+    vue_data = {};
+    vue_setup = {
+        cancel,
+        toCancel,
+        toSubmit,
+        toRemove,
+        reset11,
+        clearValidate11,
+        changeVisible11,
+        searchForSettings,
+        title,
+        visible11,
+        layFormRef11,
+        model11,
+        changeStatus,
+        dataSource,
+        sortChange,
+        columns,
+        page,
+        selectedKeys,
+        loading,
+        toSearch,
+        toReset,
+        searchQuery,
+        tableHeight,
+        onLoad,
+        change
+    };
+    methods = {};
+    watch = {};
+    computed = {};
+    mounted = function () {
+        onLoad();
+        tableHeight.value = (document.documentElement.scrollHeight || document.body.scrollHeight) - 153 + 'px';
+
+    };
+    updated = function () {
+    };
+</script>
+<style scoped>
+    .layui-form-onswitch {
+        background-color: #ff5722;
+    }
+
+    .user-box {
+        padding: 10px 15px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .top-search {
+        margin-top: 10px;
+        padding: 10px;
+        height: 40px;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    .table-box {
+        margin-top: 10px;
+        padding: 10px;
+        width: 100%;
+        border-radius: 4px;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+
+    .search-input {
+        display: inline-block;
+        width: 98%;
+        margin-right: 10px;
+    }
+
+    .table-style {
+        margin-top: 10px;
+    }
+
+    .isChecked {
+        display: inline-block;
+        background-color: #e8f1ff;
+        color: red;
+    }
+</style>
+
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}

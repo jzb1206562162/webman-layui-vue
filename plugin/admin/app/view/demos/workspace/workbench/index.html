@@ -1,0 +1,424 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}
+<script src="/plugin/admin/public/ui-lib/vue-ECharts/echarts.min.js@5.4.3.js"></script>
+<script src="/plugin/admin/public/ui-lib/vue-ECharts/vue-echarts@latest.js"></script>
+{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+
+<lay-container fluid="true" style="padding: 10px">
+    <lay-row space="10">
+        <lay-col md="18" sm="18" xs="24">
+            <lay-row :space="10">
+                <lay-col :md="24">
+                    <lay-card class="project-grids">
+                        <template v-slot:title> 最近更新</template>
+                        <template v-slot:extra> 全部更新</template>
+                        <template v-slot:body>
+                            <lay-row>
+                                <lay-col :md="8">
+                                    <div class="project-grid">
+                                        <div class="project-grid-title">
+                                            <lay-icon
+                                                    type="layui-icon-face-smile"
+                                                    color="#da242a"
+                                                    size="24px"
+                                            ></lay-icon>
+                                            <a>upload</a>
+                                        </div>
+                                        <p class="project-grid-center">
+                                            修复开启 isLazyimg:true 后,
+                                            图片懒加载但是图片不存在的报错问题
+                                        </p>
+                                        <p class="project-grid-footer">
+                                            <a>文件上传</a>
+                                            <span>7天前</span>
+                                        </p>
+                                    </div>
+                                </lay-col>
+                                <lay-col :md="8">
+                                    <div class="project-grid">
+                                        <div class="project-grid-title">
+                                            <lay-icon
+                                                    type="layui-icon-theme"
+                                                    color="#ffdc00"
+                                                    size="24px"
+                                            ></lay-icon>
+                                            <a>upload</a>
+                                        </div>
+                                        <p class="project-grid-center">
+                                            修复开启 isLazyimg:true 后,
+                                            图片懒加载但是图片不存在的报错问题
+                                        </p>
+                                        <p class="project-grid-footer">
+                                            <a>文件上传</a>
+                                            <span>7天前</span>
+                                        </p>
+                                    </div>
+                                </lay-col>
+                                <lay-col :md="8">
+                                    <div class="project-grid">
+                                        <div class="project-grid-title">
+                                            <lay-icon
+                                                    type="layui-icon-username"
+                                                    color="#2870df"
+                                                    size="24px"
+                                            ></lay-icon>
+                                            <a>upload</a>
+                                        </div>
+                                        <p class="project-grid-center">
+                                            修复开启 isLazyimg:true 后,
+                                            图片懒加载但是图片不存在的报错问题
+                                        </p>
+                                        <p class="project-grid-footer">
+                                            <a>文件上传</a>
+                                            <span>7天前</span>
+                                        </p>
+                                    </div>
+                                </lay-col>
+                                <lay-col :md="8">
+                                    <div class="project-grid">
+                                        <div class="project-grid-title">
+                                            <lay-icon
+                                                    type="layui-icon-diamond"
+                                                    color="#10bd72"
+                                                    size="24px"
+                                            ></lay-icon>
+                                            <a>upload</a>
+                                        </div>
+                                        <p class="project-grid-center">
+                                            修复开启 isLazyimg:true 后,
+                                            图片懒加载但是图片不存在的报错问题
+                                        </p>
+                                        <p class="project-grid-footer">
+                                            <a>文件上传</a>
+                                            <span>7天前</span>
+                                        </p>
+                                    </div>
+                                </lay-col>
+                                <lay-col :md="8">
+                                    <div class="project-grid">
+                                        <div class="project-grid-title">
+                                            <lay-icon
+                                                    type="layui-icon-dialogue"
+                                                    color="#ff79c6"
+                                                    size="24px"
+                                            ></lay-icon>
+                                            <a>upload</a>
+                                        </div>
+                                        <p class="project-grid-center">
+                                            修复开启 isLazyimg:true 后,
+                                            图片懒加载但是图片不存在的报错问题
+                                        </p>
+                                        <p class="project-grid-footer">
+                                            <a>文件上传</a>
+                                            <span>7天前</span>
+                                        </p>
+                                    </div>
+                                </lay-col>
+                                <lay-col :md="8">
+                                    <div class="project-grid">
+                                        <div class="project-grid-title">
+                                            <lay-icon
+                                                    type="layui-icon-search"
+                                                    color="#742cc1"
+                                                    size="24px"
+                                            ></lay-icon>
+                                            <a>upload</a>
+                                        </div>
+                                        <p class="project-grid-center">
+                                            修复开启 isLazyimg:true 后,
+                                            图片懒加载但是图片不存在的报错问题
+                                        </p>
+                                        <p class="project-grid-footer">
+                                            <a>文件上传</a>
+                                            <span>7天前</span>
+                                        </p>
+                                    </div>
+                                </lay-col>
+                            </lay-row>
+                        </template>
+                    </lay-card>
+                </lay-col>
+                <lay-col :md="24">
+                    <lay-card>
+                        <template v-slot:title> 最近动态</template>
+                        <dl>
+                            <dd class="dynamic">
+                                <div class="layui-status-img">
+                                    <a href="javascript:;"
+                                    ><img
+                                            src="https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7"
+                                    /></a>
+                                </div>
+                                <div>
+                                    <p>
+                                        张三 在
+                                        <a href="javascript:;">讨论区</a>
+                                        回答问题
+                                    </p>
+                                    <span>几秒前</span>
+                                </div>
+                            </dd>
+                            <dd class="dynamic">
+                                <div class="layui-status-img">
+                                    <a href="javascript:;"
+                                    ><img
+                                            src="https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7"
+                                    /></a>
+                                </div>
+                                <div>
+                                    <p>
+                                        张三 在
+                                        <a href="javascript:;">讨论区</a>
+                                        回答问题
+                                    </p>
+                                    <span>几秒前</span>
+                                </div>
+                            </dd>
+                            <dd class="dynamic">
+                                <div class="layui-status-img">
+                                    <a href="javascript:;"
+                                    ><img
+                                            src="https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7"
+                                    /></a>
+                                </div>
+                                <div>
+                                    <p>
+                                        张三 在
+                                        <a href="javascript:;">讨论区</a>
+                                        回答问题
+                                    </p>
+                                    <span>几秒前</span>
+                                </div>
+                            </dd>
+                            <dd class="dynamic">
+                                <div class="layui-status-img">
+                                    <a href="javascript:;"
+                                    ><img
+                                            src="https://tse1-mm.cn.bing.net/th/id/OIP-C.0fLeVmNXnV-6Eom3FEUNjgAAAA?w=196&h=196&c=7&r=0&o=5&dpr=1.5&pid=1.7"
+                                    /></a>
+                                </div>
+                                <div>
+                                    <p>
+                                        张三 在
+                                        <a href="javascript:;">讨论区</a>
+                                        回答问题
+                                    </p>
+                                    <span>几秒前</span>
+                                </div>
+                            </dd>
+                        </dl>
+                    </lay-card>
+                </lay-col>
+            </lay-row>
+        </lay-col>
+        <lay-col md="6" sm="6" xs="24">
+            <lay-row :space="10">
+                <lay-col :md="24">
+                    <lay-card>
+                        <template v-slot:title> 便捷导航</template>
+                        <div class="links">
+                            <a>操作一</a>
+                            <a>操作二</a>
+                            <a>操作三</a>
+                            <a>操作四</a>
+                            <a>操作五</a>
+                            <a>操作六</a>
+                            <a>操作七</a>
+                            <a>操作八</a>
+                        </div>
+                    </lay-card>
+                </lay-col>
+                <lay-col :md="24">
+                    <lay-card>
+                        <template v-slot:title> 八卦新闻</template>
+                        <!--方法1 用div的ref进行绑定加载,代码行数多,但无需加载额外js,缺点是当id=app的div加了 v-cloak 后,样式会有变化,本项目使用了 v-cloak,因此不推荐-->
+                        <!--<div class="main" ref="mainRef"></div>-->
+                        <!--方法2 加载vue-echarts@latest.js ,然后挂载app.component('v-chart', VueECharts)组件,直接使用组件,data里设置option数据即可,无视 v-cloak影响-->
+                        <v-chart   class="main" :option="option" autoresize></v-chart>
+                    </lay-card>
+                </lay-col>
+                <lay-col :md="24">
+                    <lay-card>
+                        <template #title> 产品动态</template>
+                        <lay-button class="news" type="primary" fluid>官网文档 {{ t('hello') }}</lay-button>
+                    </lay-card>
+                </lay-col>
+            </lay-row>
+        </lay-col>
+    </lay-row>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+<script>
+    vue_data = {
+        //echarts数据
+        option: {
+            radar: {
+                indicator: [
+                    {name: '进攻', max: 6500},
+                    {name: '技巧', max: 16000},
+                    {name: '力量', max: 30000},
+                    {name: '速度', max: 38000},
+                    {name: '体能', max: 52000},
+                    {name: '防守', max: 25000}
+                ]
+            },
+            series: [
+                {
+                    name: 'Budget vs spending',
+                    type: 'radar',
+                    data: [
+                        {
+                            value: [4200, 3000, 20000, 35000, 50000, 18000]
+                        },
+                        {
+                            value: [5000, 14000, 28000, 26000, 42000, 21000]
+                        }
+                    ]
+                }
+            ]
+        }
+    };
+    vue_setup = {}
+    methods = {
+        onLoad() {
+        }
+    };
+    watch = {};
+    computed = {};
+    mounted = function () {
+        //方法一 ,无需额外js,直接res绑定并挂载数据集;
+        // var chartDom = this.$refs.mainRef
+        // var myChart = echarts.init(chartDom)
+        // myChart.setOption(this.option)
+        //方法一结束
+        //推荐使用方法二,只要写个option挂载数据就行
+    };
+    updated = function () {
+    };
+</script>
+
+<style lang="less" scoped>
+    .project-grids .layui-card-body {
+        padding: 0;
+    }
+
+
+    .project-grid:hover {
+        box-shadow: 1px 1px 17px #ccc;
+    }
+
+    .project-grid {
+        padding: 24px;
+        background-color: #f8f8f8;
+        border-radius: 4px;
+        margin: 10px;
+        color: #777;
+    }
+
+    .project-grid .project-grid-title {
+        padding-bottom: 10px;
+    }
+
+    .project-grid .project-grid-title i {
+        margin-right: 10px;
+        font-size: 24px;
+        color: #009688;
+    }
+
+    .project-grid .project-grid-title a {
+        line-height: 24px;
+        font-size: 16px;
+        vertical-align: top;
+    }
+
+    .project-grid .project-grid-title .layui-icon {
+        font-weight: 600;
+    }
+
+    .project-grid .project-grid-center {
+        height: 44px;
+        line-height: 22px;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+
+    .project-grid .project-grid-footer {
+        position: relative;
+    }
+
+    .project-grid .project-grid-footer a {
+        color: #777;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        word-break: break-all;
+    }
+
+    .project-grid .project-grid-footer span {
+        color: #ccc;
+        font-size: 12px;
+        position: absolute;
+        right: 0;
+    }
+
+
+    .dynamic {
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+        display: -webkit-flex;
+        display: flex;
+    }
+
+    .dynamic .layui-status-img img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #009688;
+        margin-right: 15px;
+    }
+
+    .dynamic a {
+        color: #0481ff;
+    }
+
+    .dynamic span {
+        color: #bbb;
+    }
+
+
+    .links {
+        padding: 10px;
+    }
+
+    .links a {
+        width: 25%;
+        font-size: 14px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        display: inline-block;
+        color: #666;
+    }
+
+    .links a:hover {
+        color: #11be73;
+    }
+
+
+    .main {
+        height: 300px;
+        width: 100%;
+    }
+</style>
+
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{__block__}
+<script>
+    //方法二,此处需要配合vue-echarts@latest.js食用
+    app.component('v-chart', VueECharts)
+</script>
+{/block}
+{block name="mountApp"}{__block__}{/block}

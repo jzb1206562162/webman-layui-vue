@@ -1,0 +1,70 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/favicon.ico"/>
+    <title>404</title>
+    <link rel="stylesheet" href="//unpkg.com/@layui/layui-vue/lib/index.css" />
+    <script src="//unpkg.com/vue@3"></script>
+    <script src="//unpkg.com/@layui/layui-vue"></script>
+</head>
+<script>
+    const {createApp, ref, reactive, provide, inject, defineComponent} = Vue;
+    const {layer} = LayuiVue;
+</script>
+
+<body>
+<div id="app" v-cloak>
+    <lay-card class="error-page">
+        <lay-exception status="404" title="404" describe="错误,页面不存在">
+            <template #extra>
+                <lay-button @click="reload"> 刷新</lay-button>
+                <lay-button type="primary">返回</lay-button>
+            </template>
+        </lay-exception>
+    </lay-card>
+</div>
+<script>
+    const App = {
+        methods: {
+            reload() {
+                location.reload();
+            }
+        },
+    };
+    const app = Vue.createApp(App);
+    app.use(LayuiVue);
+    app.mount("#app")
+</script>
+<style>
+    #app {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        box-sizing: border-box;
+        overflow: hidden;
+        height: calc(100% - 20px);
+        width: calc(100% - 20px);
+        background: #fff;
+    }
+
+    #app > .error-page {
+        margin-top: 250px;
+        box-shadow: 0 0 0 #fff;
+    }
+
+    .error-404 {
+        width: 50%;
+        float: right;
+    }
+
+    .layui-exception-details-title {
+        line-height: normal;
+    }
+</style>
+
+</body>
+</html>

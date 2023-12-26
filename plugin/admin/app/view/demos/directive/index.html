@@ -1,0 +1,91 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<div style="padding: 10px 15px">
+    <lay-card>
+        <p class="header-title">内置指令</p>
+        <p class="header-describe">vue自定义指令directives,支持将功能封装为指令进行快捷使用,目前仅实现个别指令供参考</p>
+        <p class="header-describe">
+            自定义指令需要在mount之前加载directives,因此block的mountApp处进行了改写,可加载指定自定义指令(推荐)或全部加载</p>
+        <p class="header-describe">更多自定义指令实现参考:
+            <a style="color: red" href="https://www.kancloud.cn/ruizhang/vue-directive/2636479">此处</a>,
+            此文档是使用node的typescript写法,请参考copy指令自行修改并实现其他指令</p>
+
+    </lay-card>
+    <lay-container :fluid="true" style="padding: 10px;padding-top: 0px;">
+        <lay-card>
+            <template #title>复制指令: v-copy</template>
+            <lay-input placeholder="在此处粘贴复制内容"></lay-input>
+            <br><br>
+            <lay-button v-copy>单击复制</lay-button>
+            <span>&#12288;&lt;lay-button v-copy&gt;单击复制&lt;/lay-button&gt;</span><br><br>
+            <lay-button v-copy.dblclick>双击复制</lay-button>
+            <span>&#12288;&lt;lay-button v-copy.dblclick&gt;单击复制&lt;/lay-button&gt;</span><br><br>
+            <lay-button v-copy="'我是自定义内容'" type="primary">自定义复制内容</lay-button>
+            <span>&#12288;&lt;lay-button v-copy="'我是自定义内容'" &gt;单击复制&lt;/lay-button&gt;</span>
+
+        </lay-card>
+    </lay-container>
+    <lay-container :fluid="true" style="padding: 10px;padding-top: 0px;">
+        <lay-card>
+            <template #title>禁止重复点击: v-throttle</template>
+
+
+            <lay-button v-throttle="{fn: throttle,time:3000}">3秒内重复点击无效</lay-button>
+            <span>&#12288;&lt;lay-button v-throttle="{fn: throttle,time:3000}" &gt;3秒内重复点击无效&lt;/lay-button&gt;</span>
+
+        </lay-card>
+    </lay-container>
+</div>
+{/block}
+{block name="afterDiv"}
+<script>
+    vue_data = {
+        num: 0
+    };
+    vue_setup = {};
+    methods = {
+        onLoad() {
+        },
+        throttle() {
+            this.num += 1;
+            layer.msg("我被点击了" + this.num + '次', {time: 1000, icon: 1})
+        }
+    };
+    watch = {};
+    computed = {};
+    mounted = function () {
+        this.onLoad();
+    };
+    updated = function () {
+    };
+</script>
+
+
+<style scoped>
+    .header-title {
+        font-size: 20px;
+        font-weight: 500;
+        margin-top: 12px;
+        margin-bottom: 20px;
+    }
+
+    .header-describe {
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+</style>
+
+
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}
+<script>
+    const directiveScriptName = ['copy', 'throttle'];//设定加载的自定义指令,不设置的话默认加载全部自定义指令
+</script>
+<script src="/plugin/admin/public/js-lib/vue/directives/index.js"></script>
+<!--注意,此处虽然覆盖了app.mount("#app"),且重新写在directives/index.js里了,所以无需再写-->
+{/block}

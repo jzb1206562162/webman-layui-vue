@@ -1,0 +1,394 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+<lay-container fluid="true" class="user-box">
+    <lay-card>
+        <lay-form style="margin-top: 10px">
+            <lay-row>
+                <lay-col :md="5">
+                    <lay-form-item label="名称" label-width="80">
+                        <lay-input v-model="searchQuery.name" placeholder="请输入"
+                                   size="sm" :allow-clear="true" style="width: 98%"></lay-input>
+                    </lay-form-item>
+                </lay-col>
+                <lay-col :md="5">
+                    <lay-form-item label-width="20">
+                        <lay-button style="margin-left: 20px" type="primary" size="sm" @click="toSearch">
+                            查询
+                        </lay-button>
+                        <lay-button size="sm" @click="toReset"> 重置</lay-button>
+                    </lay-form-item>
+                </lay-col>
+            </lay-row>
+        </lay-form>
+    </lay-card>
+    <!-- table -->
+    <div class="table-box">
+        <lay-table
+                class="table-style" :page="page" :columns="columns" :loading="loading" :height="tableHeight"
+                :default-toolbar="true" :data-source="dataSource" v-model:selected-keys="selectedKeys"
+                @change="change" @sort-change="sortChange">
+            <template #status="{ row }">
+                <lay-switch :model-value="row.status?true:false" @change="changeStatus($event, row)"></lay-switch>
+            </template>
+            <template v-slot:toolbar>
+                <lay-button size="sm" type="primary" @click="changeVisible11('新增')">
+                    <lay-icon class="layui-icon-addition"></lay-icon>
+                    新增
+                </lay-button>
+                <lay-button size="sm" @click="toRemove(0)">
+                    <lay-icon class="layui-icon-delete"></lay-icon>
+                    删除
+                </lay-button>
+            </template>
+            <template v-slot:operator="{ row }">
+                <div>
+                    <lay-button size="xs" type="primary" @click="changeVisible11('编辑', row)">编辑</lay-button>
+                    <lay-button size="xs" border="red" border-style="dashed" @click="toRemove(row)">删除</lay-button>
+                </div>
+            </template>
+        </lay-table>
+    </div>
+
+    <lay-layer v-model="visible11" :title="title" :area="['800px', '550px']">
+        <div style="padding: 20px">
+            <lay-form :model="model11" ref="layFormRef11" class="addfrom">
+                <lay-form-item label="字典名称" prop="name" required>
+                    <lay-input type="text" v-model="model11.name"></lay-input>
+                </lay-form-item>
+                <div class="layui-form-item-right leable-none ">
+                    <label class="layui-form-label">内容:</label>
+                    <lay-form-item prop="value" class="info-none" :label-position="'top'" label="值"
+                                   mode="inline">
+                        <lay-input placeholder="值" v-model="model11.value"
+                                   class="sm-info">
+                            <template #suffix>值</template>
+                        </lay-input>
+                    </lay-form-item>
+
+
+                    <lay-form-item prop="title" class="info-none" :label-position="'top'" label="标识"
+                                   mode="inline">
+                        <lay-input  placeholder="标识" v-model="model11.title"
+                                   class="sm-info">
+                            <template #suffix>标识</template>
+                        </lay-input>
+                    </lay-form-item>
+
+
+                    <lay-button border="green" @click="toSubmit(0)">
+                        <lay-icon type="layui-icon-add-circle"></lay-icon>
+                    </lay-button>
+
+                </div>
+                <lay-table :columns="columns2" :data-source="dataSource2" >
+                    <template v-slot:operator="{ data }">
+                        <lay-button size="xs" type="primary" @click="toSubmit(data)">删除</lay-button>
+                    </template>
+                </lay-table>
+            </lay-form>
+        </div>
+    </lay-layer>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+
+<script>
+
+    const searchQuery = ref({
+        name: '',
+        page: 1,
+        limit: 10
+    })
+
+    function toReset() {
+        searchQuery.value = {
+            name: '',
+            page: 1,
+            limit: 10
+        }
+    }
+
+    function toSearch() {
+        searchQuery.value.page = 1
+        page.current = 1
+        onLoad()
+    }
+
+    const loading = ref(false)
+    const selectedKeys = ref([])
+    const page = reactive({
+        current: 1,
+        limit: 10,
+        total: 100,
+        layout: ['count', 'prev', 'page', 'next', 'limits', 'refresh', 'skip']
+    })
+    const columns2 = [
+        {title: "值", key: "value", align: "left"},
+        {title: "标题", key: "name", align: "left"},
+        {title: "操作", customSlot: "operator", key: "operator"},
+    ]
+    const dataSource2 = ref([])
+
+    const columns = ref([
+        {title: '选项', width: '60px', type: 'checkbox', fixed: 'left'},
+        {title: 'ID', width: '80px', key: 'id', fixed: 'left', sort: 'desc'},
+        {title: '名称', width: '120px', key: 'name'},
+        {title: '值', key: 'value', ellipsisTooltip: true},
+        {title: '创建时间', width: '120px', key: 'created_at'},
+        {title: '更新时间', width: '120px', key: 'updated_at'},
+        {
+            title: '操作',
+            width: '120px',
+            customSlot: 'operator',
+            key: 'operator',
+            fixed: 'right'
+        }
+    ])
+    const change = (page) => {
+        searchQuery.value.page = page.current;
+        searchQuery.value.limit = page.limit;
+        onLoad()
+    }
+    const sortChange = (key, sort) => {
+        // layer.msg(`字段${key} - 排序${sort}, 你可以利用 sort-change 实现服务端排序`)
+    }
+    const dataSource = ref()
+
+    const changeStatus = (isChecked, row) => {
+        dataSource.value.forEach(async (item) => {
+            if (item.id === row.id) {
+                let res = await ajax('/app/admin/user/update', {id: item.id, status: isChecked ? 1 : 0}, false)
+                if (res.code === 0) item.status = isChecked
+            }
+        })
+    }
+
+
+    const model11 = ref({})
+    const layFormRef11 = ref()
+    const visible11 = ref(false)
+    const title = ref('新增')
+    const changeVisible11 = async (text, row) => {
+        title.value = text
+        if (row) {
+            let data = deepClone(row)
+            model11.value={
+                name : data.name,
+                id:data.id,
+            };
+            dataSource2.value= JSON.parse(data.value)
+        } else {
+            model11.value = {
+                name:''
+            }
+            dataSource2.value=[]
+        }
+        visible11.value = !visible11.value
+    }
+
+    // 清除校验
+    const clearValidate11 = function () {
+        layFormRef11.value.clearValidate()
+    }
+    // 重置表单
+    const reset11 = function () {
+        layFormRef11.value.reset()
+    }
+    function toRemove(row) {
+        if (!row && selectedKeys.value.length === 0) {
+            layer.msg('您未选择数据，请先选择要删除的数据', {icon: 3, time: 2000})
+            return
+        }
+        let data, title = '删除警告', msg = '确定要删除此条数据吗'
+        if (row) {
+            data = {name: row.name};
+        } else {
+            console.log(selectedKeys.value)
+            data = {id: selectedKeys.value}
+            msg = '确定要删除所选择的' + selectedKeys.value.length + '条数据吗'
+        }
+        deleteData('/app/admin/dict/delete', data, this, 'onLoad', false, title, msg)
+    }
+
+    async function toSubmit(row) {
+        let model =deepClone(model11.value)
+        let data =deepClone(dataSource2.value)
+        if(row){
+            data = data.filter(item => (item.name !== row.name || item.value !== row.value ));
+        }else{
+            data.push({name:model.title,value:model.value})
+        }
+        console.log(data)
+        let res ;
+        if (model11.value.id ||  dataSource2.value.length>0 ) {
+            res = await ajax('/app/admin/dict/update', {name:model.name,value:data})
+        } else {
+            console.log(data)
+            res = await ajax('/app/admin/dict/insert', {name:model.name,value:data})
+        }
+        if (res.code === 0) {
+                dataSource2.value =data
+        }
+    }
+
+    function toCancel() {
+        visible11.value = false
+    }
+
+    const tableHeight = ref('500px');
+
+    async function onLoad(bool = false) {
+        if (bool) toReset();
+        let res = await get('/app/admin/dict/select', true, searchForSettings())
+        if (res) {
+            dataSource.value = res.data;
+            page.total = res.count;
+        }
+        visible11.value = false
+
+    }
+
+    function searchForSettings() {
+        return deepClone(searchQuery.value);
+    }
+
+</script>
+<script>
+
+    vue_data = {};
+    vue_setup = {
+        toSubmit,
+        toCancel,
+        toRemove,
+        reset11,
+        clearValidate11,
+        changeVisible11,
+        searchForSettings,
+        title,
+        visible11,
+        layFormRef11,
+        model11,
+        changeStatus,
+        dataSource2,
+        columns2,
+        dataSource,
+        sortChange,
+        columns,
+        page,
+        selectedKeys,
+        loading,
+        toSearch,
+        toReset,
+        searchQuery,
+        tableHeight,
+        onLoad,
+        change
+    };
+    methods = {};
+    watch = {};
+    computed = {};
+    mounted = function () {
+        onLoad();
+        tableHeight.value = (document.documentElement.scrollHeight || document.body.scrollHeight) - 153 + 'px';
+
+    };
+    updated = function () {
+    };
+</script>
+<style scoped>
+    .addfrom .info-none {
+        display: inline-block;
+        width: 170px;
+        margin-right: 0;
+    }
+    .addfrom   .layui-input-inline{
+        width:100%;
+        margin:0
+    }
+    .leable-none{
+        display: flex;
+    }
+
+
+    .leable-none > .select-lay {
+        width: 220px;
+    }
+
+    .layui-layer-title {
+        color: red
+    }
+
+    .info-none label {
+        display: none;
+    }
+
+    .addfrom .layui-input {
+        width: 280px
+    }
+
+    .select-lay .layui-input {
+        width: 220px;
+    }
+
+
+    .inline-input {
+        display: inline-block;
+        width: 45%;
+    }
+
+    .addfrom .sm-info {
+        width: 170px;
+    }
+
+
+    .layui-form-onswitch {
+        background-color: #ff5722;
+    }
+
+    .user-box {
+        padding: 10px 15px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .top-search {
+        margin-top: 10px;
+        padding: 10px;
+        height: 40px;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    .table-box {
+        margin-top: 10px;
+        padding: 10px;
+        width: 100%;
+        border-radius: 4px;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+
+    .search-input {
+        display: inline-block;
+        width: 98%;
+        margin-right: 10px;
+    }
+
+    .table-style {
+        margin-top: 10px;
+    }
+
+    .isChecked {
+        display: inline-block;
+        background-color: #e8f1ff;
+        color: red;
+    }
+</style>
+
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{/block}
+{block name="mountApp"}{__block__}{/block}
