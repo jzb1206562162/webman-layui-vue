@@ -1,0 +1,394 @@
+{extend name="layouts/main-layui-vue-index" /}
+{block name="title"}{__block__}{/block}
+{block name="header"}
+<script src="/plugin/admin/public/ui-lib/vue-ECharts/echarts.min.js@5.4.3.js"></script>
+<script src="/plugin/admin/public/ui-lib/vue-ECharts/vue-echarts@latest.js"></script>
+
+{/block}
+{block name="beforeDiv"}{/block}
+{block name="appDiv"}
+
+<lay-container :fluid="true" style="padding: 10px">
+    <lay-row space="10">
+
+        <lay-col md="24" sm="8" xs="24">
+            <lay-card>
+                <template #title> 数据统计</template>
+                <lay-row :space="10">
+                    <lay-col :md="6">
+                        <a class="agency">
+                            <h3>今日注册</h3>
+                            <p>
+                                <cite>{{maindata.today_user_count}}</cite>
+                            </p>
+                        </a>
+                    </lay-col>
+                    <lay-col :md="6">
+                        <a class="agency">
+                            <h3>7日内注册</h3>
+                            <p>
+                                <cite>{{maindata.day7_user_count}}</cite>
+                            </p>
+                        </a>
+                    </lay-col>
+                    <lay-col :md="6">
+                        <a class="agency">
+                            <h3>30日内注册</h3>
+                            <p>
+                                <cite>{{maindata.day30_user_count}}</cite>
+                            </p>
+                        </a>
+                    </lay-col>
+                    <lay-col :md="6">
+                        <a class="agency">
+                            <h3>总注册</h3>
+                            <p>
+                                <cite>{{maindata.user_count}}</cite>
+                            </p>
+                        </a>
+                    </lay-col>
+                </lay-row>
+            </lay-card>
+        </lay-col>
+
+        <lay-col md="16" sm="16" xs="24">
+            <lay-row :space="10">
+                <lay-col :md="24">
+                    <lay-card>
+                        <template #title> 数据概览</template>
+                        <v-chart class="main" :option="option" autoresize></v-chart>
+                    </lay-card>
+                </lay-col>
+            </lay-row>
+        </lay-col>
+        <lay-col md="8" sm="8" xs="12">
+            <lay-card>
+                <template #title> 系统信息</template>
+                <table class="layui-table">
+                    <tr>
+                        <td>layui-vue</td>
+                        <td>{{maindata.layui_vue}}</td>
+                    </tr><tr>
+                        <td>Workerman版本</td>
+                        <td>{{maindata.workerman_version}}</td>
+                    </tr>
+                    <tr>
+                        <td>Webman版本</td>
+                        <td>{{maindata.webman_version}}</td>
+                    </tr>
+                    <tr>
+                        <td>WebmanAdmin版本</td>
+                        <td>{{maindata.admin_version}}</td>
+                    </tr>
+                    <tr>
+                        <td>PHP版本</td>
+                        <td>{{maindata.php_version}}</td>
+                    </tr>
+                    <tr>
+                        <td>MYSQL版本</td>
+                        <td>{{maindata.mysql_version}}</td>
+                    </tr>
+                    <tr>
+                        <td>操作系统</td>
+                        <td>{{maindata.os}}</td>
+                    </tr>
+                </table>
+            </lay-card>
+        </lay-col>
+    </lay-row>
+</lay-container>
+{/block}
+{block name="afterDiv"}
+<script lang="ts">
+    let echartData = [
+        {
+            name: '1号',
+            value1: 1,
+        },
+        {
+            name: '1号',
+            value1: 2,
+        },
+        {
+            name: '1号',
+            value1: 3,
+        },
+        {
+            name: '1号',
+            value1: 4,
+        },
+        {
+            name: '1号',
+            value1: 5,
+        },
+        {
+            name: '1号',
+            value1: 6,
+        },
+        {
+            name: '1号',
+            value1: 7,
+        },
+    ];
+    let xAxisData = echartData.map((v) => v.name);
+    let yAxisData1 = echartData.map((v) => v.value1);
+    console.log(yAxisData1)
+    console.log(xAxisData)
+    let color = [
+        '#0090FF',
+        '#36CE9E',
+        '#FFC005',
+        '#FF515A',
+        '#8B5CFF',
+        '#00CA69'
+    ];
+    const hexToRgba = (hex, opacity) => {
+        let rgbaColor = ''
+        let reg = /^#[\da-f]{6}$/i
+        if (reg.test(hex)) {
+            rgbaColor = `rgba(${parseInt('0x' + hex.slice(1, 3))},${parseInt(
+                '0x' + hex.slice(3, 5)
+            )},${parseInt('0x' + hex.slice(5, 7))},${opacity})`
+        }
+        return rgbaColor
+    }
+    vue_data = {
+        maindata: ref({}),
+        option: ref({
+            color: color,
+            legend: {
+                right: 10,
+                top: 10
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                    let html = ''
+                    params.forEach((v) => {
+                        html += `<div style="color: #666;font-size: 14px;line-height: 24px">
+					                <span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${
+                            color[v.componentIndex]
+                        };"></span>
+					                ${v.seriesName}.${v.name}
+					                <span style="color:${
+                            color[v.componentIndex]
+                        };font-weight:700;font-size: 18px">${v.value}</span>
+					                人`
+                    })
+                    return html
+                },
+                extraCssText:
+                    'background: #fff; border-radius: 0;box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);color: #333;',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                x: '50px',
+                y: '50px',
+                x2: '50px',
+                y2: '50px'
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLabel: {
+                        formatter: '{value}日',
+                        textStyle: {
+                            color: '#333'
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#D9D9D9'
+                        }
+                    },
+                    data: xAxisData
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    axisLabel: {
+                        textStyle: {
+                            color: '#666'
+                        }
+                    },
+                    nameTextStyle: {
+                        color: '#666',
+                        fontSize: 12,
+                        lineHeight: 40
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            type: 'dashed',
+                            color: '#E9E9E9'
+                        }
+                    },
+                    axisLine: {
+                        show: false
+                    },
+                    axisTick: {
+                        show: false
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: '近7日数据',
+                    type: 'line',
+                    smooth: true,
+                    symbolSize: 8,
+                    zlevel: 3,
+                    lineStyle: {
+                        normal: {
+                            color: color[0],
+                            shadowBlur: 3,
+                            shadowColor: hexToRgba(color[0], 0.5),
+                            shadowOffsetY: 8
+                        }
+                    },
+                    areaStyle: {
+                        normal: {
+                            color: new echarts.graphic.LinearGradient(
+                                0,
+                                0,
+                                0,
+                                1,
+                                [
+                                    {
+                                        offset: 0,
+                                        color: hexToRgba(color[0], 0.3)
+                                    },
+                                    {
+                                        offset: 1,
+                                        color: hexToRgba(color[0], 0.1)
+                                    }
+                                ],
+                                false
+                            ),
+                            shadowColor: hexToRgba(color[0], 0.1),
+                            shadowBlur: 10
+                        }
+                    },
+                    data: yAxisData1
+                },
+
+            ]
+        }),
+    }
+    vue_setup = {}
+    methods = {
+        async onLoad() {
+             let res = await post('/app/admin/index/dashboard');
+            this.maindata = res.data
+            console.log( xAxis =Object.keys(res.data.day7_detail))
+            console.log( yAxis =Object.values(res.data.day7_detail))
+            this.option.xAxis[0].data=xAxis;
+            this.option.series[0].data=yAxis;
+        }
+    };
+    watch = {};
+    computed = {};
+    mounted = function () {
+       this. onLoad()
+    };
+    updated = function () {
+    };
+
+
+</script>
+
+<style lang="less" scoped>
+    .main {
+        width: 100%;
+        height: 400px;
+    }
+
+    .shortcut {
+        text-align: center;
+    }
+
+    .shortcut i {
+        display: inline-block;
+        width: 100%;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        border-radius: 2px;
+        font-weight: 500;
+        font-size: 30px;
+        background-color: #f8f8f8;
+        color: #333;
+        transition: all 0.3s;
+        -webkit-transition: all 0.3s;
+    }
+
+    .shortcut cite {
+        position: relative;
+        top: 2px;
+        display: block;
+        color: #666;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 14px;
+    }
+
+    .shortcut:hover i {
+        font-weight: 700;
+        background-color: #009b410f;
+        color: #009688;
+        box-shadow: 1px 1px 4px #cccccc53;
+    }
+
+    .shortcut:hover cite {
+        font-weight: 600;
+        color: #009688;
+    }
+
+    .agency {
+        display: block;
+        padding: 10.5px 16px;
+        background-color: #f8f8f8;
+        color: #999;
+        border-radius: 2px;
+    }
+
+    .agency h3 {
+        padding-bottom: 10px;
+        font-size: 12px;
+    }
+
+    .agency p cite {
+        font-style: normal;
+        font-size: 30px;
+        font-weight: 300;
+        color: #009688;
+    }
+
+
+    .task-progress {
+        padding: 10px 5px;
+    }
+
+    .task-progress .task-progress-title {
+        right: 20px;
+        position: absolute;
+        color: #999;
+    }
+
+    .task-progress .layui-progress {
+        margin-top: 10px;
+    }
+
+</style>
+{/block}
+{block name="constApp"}{__block__}{/block}
+{block name="plugins"}{__block__}
+<script>
+    app.component('v-chart', VueECharts)
+</script>
+{/block}
+{block name="mountApp"}{__block__}{/block}

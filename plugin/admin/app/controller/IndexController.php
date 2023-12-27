@@ -53,7 +53,9 @@ class IndexController extends Crud
      */
     public function dashboard(Request $request): Response
     {
-        return think_view('demos/workspace/workbench/index');
+       if( isGet()){
+           return think_view('index/dashboard');
+       }
         // 今日新增用户数
         $today_user_count = User::where('created_at', '>', date('Y-m-d') . ' 00:00:00')->count();
         // 7天内新增用户数
@@ -73,6 +75,11 @@ class IndexController extends Crud
             $day7_detail[substr($date, 5)] = User::where('created_at', '>', "$date 00:00:00")
                 ->where('created_at', '<', "$date 23:59:59")->count();
         }
+        $layuiPath=run_path('plugin/admin/public/ui-lib/layui-vue/');
+        $files = scandir($layuiPath);
+        $matchingFiles = array_filter($files, function($file) {
+            return strpos($file, "layui-vue@")!== false &&   strpos($file, ".js")!=false ;
+        });
         $data=[
             'today_user_count' => $today_user_count,
             'day7_user_count' => $day7_user_count,
@@ -85,6 +92,9 @@ class IndexController extends Crud
             'mysql_version' => $mysql_version,
             'os' => PHP_OS,
             'day7_detail' => array_reverse($day7_detail),
+            'layui_vue'=>str_replace('.js','',array_values($matchingFiles)[0])
+
+
         ];
         return $this->success('',$data) ;
     }
